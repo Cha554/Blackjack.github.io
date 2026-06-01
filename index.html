@@ -10,13 +10,13 @@
         :root {
             --felt-green: #2e7d32;
             --felt-dark: #1b5e20;
-            --gold: #ffd700;
-            --gold-dim: #b8860b;
-            --red: #d32f2f;
+            --gold: #FFD700; /* Bright Gold */
+            --gold-glow: rgba(255, 215, 0, 0.6);
+            --red: #ff3333; /* Bright Red */
             --black: #000000;
-            --card-bg: #111;
-            --card-w: 110px; /* Bigger Cards */
-            --card-h: 154px; /* Bigger Cards */
+            --card-bg: #000000; /* Pure Black */
+            --card-w: 110px;
+            --card-h: 154px;
         }
 
         * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
@@ -84,7 +84,7 @@
         .panel {
             background: linear-gradient(145deg, #1a1a1a, #222); padding: 30px; border-radius: 16px;
             box-shadow: 0 15px 40px rgba(0,0,0,0.8), 0 0 20px rgba(255, 215, 0, 0.1);
-            text-align: center; border: 1px solid var(--gold-dim);
+            text-align: center; border: 1px solid #444;
             width: 90%; max-width: 450px;
         }
         .panel h2 { margin-top: 0; color: var(--gold); text-transform: uppercase; letter-spacing: 2px;}
@@ -99,7 +99,7 @@
         input:focus { border-color: var(--gold); }
 
         .btn-primary {
-            width: 100%; padding: 14px; background: linear-gradient(to bottom, var(--gold), var(--gold-dim)); color: var(--black);
+            width: 100%; padding: 14px; background: linear-gradient(to bottom, var(--gold), #b8860b); color: var(--black);
             border: none; font-weight: bold; font-size: 1.1rem;
             border-radius: 8px; cursor: pointer; transition: transform 0.1s, filter 0.2s;
             text-transform: uppercase;
@@ -125,7 +125,7 @@
         /* --- Game Board --- */
         #game-board {
             width: 100%; max-width: 1200px; height: 100%;
-            display: none; flex-direction: column; padding: 10px 20px 100px 20px; /* Bottom padding for controls */
+            display: none; flex-direction: column; padding: 10px 20px 100px 20px;
         }
 
         .area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
@@ -133,13 +133,12 @@
         .players-area { justify-content: flex-end; flex: 1.2; }
 
         .hand-container { 
-            display: flex; gap: -40px; /* Overlap cards slightly */
+            display: flex; gap: -40px;
             justify-content: center; 
             height: var(--card-h); 
             margin-top: 10px;
         }
         
-        /* Specific container for split hands to stack them vertically */
         .split-wrapper {
             display: flex;
             flex-direction: column;
@@ -168,31 +167,32 @@
         .player-info .bet-amount { font-size: 0.9rem; color: #ddd; }
         .player-info .status-text { font-size: 0.85rem; font-style: italic; min-height: 1.2em; margin-top: 5px;}
 
-        /* --- Card Styles --- */
+        /* --- Card Styles (FIXED FOR VISIBILITY) --- */
         .card {
             width: var(--card-w); height: var(--card-h);
             background: var(--card-bg); 
             border-radius: 10px;
             border: 2px solid var(--gold);
-            color: var(--gold); 
+            color: #fff; /* Default Text White */
             font-weight: bold;
             position: relative; 
-            box-shadow: 5px 5px 15px rgba(0,0,0,0.8), inset 0 0 20px rgba(255, 215, 0, 0.1);
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.8);
             display: flex; justify-content: center; align-items: center;
             font-size: 2rem; 
             flex-shrink: 0;
-            margin-right: -40px; /* Card overlap effect */
+            margin-right: -40px;
             transition: transform 0.3s;
+            user-select: none;
         }
         .card:last-child { margin-right: 0; }
         
-        /* Card Design Details */
         .card::before {
             content: ''; position: absolute; top: 5px; left: 5px; right: 5px; bottom: 5px;
             border: 1px solid rgba(255, 215, 0, 0.3);
             border-radius: 6px;
             pointer-events: none;
         }
+        
         .card-corner {
             position: absolute; display: flex; flex-direction: column; align-items: center;
             font-size: 0.9rem; line-height: 1;
@@ -200,7 +200,7 @@
         .top-left { top: 8px; left: 8px; }
         .bottom-right { bottom: 8px; right: 8px; transform: rotate(180deg); }
 
-        .card-center { font-size: 2.5rem; }
+        .card-center { font-size: 3rem; font-weight: 900; }
 
         @keyframes deal { 
             0% { transform: translateY(-200px) scale(0.5) rotate(10deg); opacity: 0; } 
@@ -208,9 +208,9 @@
         }
         .card.animate { animation: deal 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         
-        .card.red { color: var(--red); border-color: var(--red); }
-        .card.red::before { border-color: rgba(211, 47, 47, 0.3); }
-        .card.red .gold-accent { color: var(--gold); }
+        /* Suit Colors */
+        .suit-red { color: var(--red); text-shadow: 0 0 5px rgba(255, 51, 51, 0.5); }
+        .suit-black { color: var(--gold); text-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
 
         .card.hidden {
             background: repeating-linear-gradient(45deg, #111, #111 10px, #222 10px, #222 20px);
@@ -218,7 +218,7 @@
         }
         .card.hidden * { display: none; }
         .card.hidden::after {
-            content: '♠♥♣♦'; color: var(--gold-dim); opacity: 0.2;
+            content: '♠♥♣♦'; color: var(--gold); opacity: 0.2;
             font-size: 1.5rem; transform: rotate(45deg);
         }
 
@@ -243,7 +243,7 @@
         .btn-stand { background: linear-gradient(135deg, #e53935, #c62828); }
         .btn-double { background: linear-gradient(135deg, #1e88e5, #1565c0); }
         .btn-split { background: linear-gradient(135deg, #8e24aa, #6a1b9a); }
-        .btn-deal { background: linear-gradient(135deg, var(--gold), var(--gold-dim)); color: black; max-width: 200px; flex: 2;}
+        .btn-deal { background: linear-gradient(135deg, var(--gold), #b8860b); color: black; max-width: 200px; flex: 2;}
 
         .bet-control { display: none; flex-direction: row; align-items: center; justify-content: center; gap: 20px; width: 100%; }
         
@@ -276,14 +276,13 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
 
-        /* Action Buttons Layout */
         .action-group { display: flex; gap: 10px; width: 100%; max-width: 500px; justify-content: center;}
 
         @media (max-width: 600px) {
             :root { --card-w: 70px; --card-h: 98px; }
             .card { font-size: 1.2rem; margin-right: -30px; }
-            .card-center { font-size: 1.5rem; }
-            .btn-double, .btn-split { display: none; } /* Hide complex buttons on very small screens to save space */
+            .card-center { font-size: 1.8rem; }
+            .btn-double, .btn-split { display: none; } 
             .btn-hit, .btn-stand { flex: 1; max-width: none; }
         }
         @media (min-width: 601px) {
@@ -383,16 +382,16 @@
     <script>
         /* --- Configuration --- */
         const BROKER_URL = 'wss://broker.emqx.io:8084/mqtt';
-        const TOPIC_PREFIX = 'blackjack/premium/v2/';
+        const TOPIC_PREFIX = 'blackjack/premium/v3/';
         
         /* --- Game State --- */
         let gameState = {
             roomCode: null,
-            phase: 'LOBBY', // LOBBY, BETTING, PLAYING, RESULT
+            phase: 'LOBBY', 
             deck: [],
             dealerHand: [],
             players: [],
-            turnQueue: [], // { playerId, handIndex }
+            turnQueue: [], 
             isHost: false
         };
 
@@ -485,7 +484,7 @@
                     if (!gameState.players.find(p => p.id === data.id)) {
                         gameState.players.push({ 
                             id: data.id, name: data.name, 
-                            hands: [], // Array of hand objects {cards:[], bet:0, status:'WAITING'}
+                            hands: [], 
                             totalBet: 0 
                         });
                         broadcastState();
@@ -506,7 +505,6 @@
             myName = name;
             gameState.isHost = true;
             
-            // Add self
             gameState.players.push({ id: myId, name: myName, hands: [], totalBet: 0 });
             
             const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -557,7 +555,6 @@
                     deck.push({ suit: s, value: v, weight: weight });
                 }
             }
-            // Fisher-Yates Shuffle
             for (let i = deck.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [deck[i], deck[j]] = [deck[j], deck[i]];
@@ -583,11 +580,9 @@
         function handleHostBet(pid, amount) {
             const p = gameState.players.find(pl => pl.id === pid);
             if (p) {
-                // Create the first hand structure with the bet
                 p.hands = [{ cards: [], bet: amount, status: 'WAITING', result: '' }];
                 p.totalBet = amount;
                 
-                // If all players have bet (hands array is not empty)
                 if (gameState.players.every(pl => pl.hands.length > 0)) {
                     dealInitialCards();
                 }
@@ -598,7 +593,6 @@
         function dealInitialCards() {
             gameState.phase = 'PLAYING';
             
-            // Deal 2 cards to each active hand
             gameState.players.forEach(p => {
                 p.hands.forEach(h => {
                     h.cards.push(gameState.deck.pop());
@@ -606,7 +600,6 @@
                 });
             });
 
-            // Deal Dealer Cards
             gameState.dealerHand.push(gameState.deck.pop());
             gameState.dealerHand.push(gameState.deck.pop());
 
@@ -638,7 +631,6 @@
             gameState.players.forEach((p, pIdx) => {
                 p.hands.forEach((h, hIdx) => {
                     if (h.status === 'WAITING' || h.status === 'PLAYING') {
-                        // If not blackjack or bust
                         if(h.status !== 'BLACKJACK' && h.status !== 'BUST') {
                             h.status = 'PLAYING';
                             gameState.turnQueue.push({ playerId: p.id, handIndex: hIdx });
@@ -663,7 +655,7 @@
                     hand.status = 'BUST';
                     nextTurn();
                 } else if (hand.score === 21) {
-                    hand.status = 'STAND'; // Auto stand on 21
+                    hand.status = 'STAND'; 
                     nextTurn();
                 }
             } 
@@ -672,45 +664,30 @@
                 nextTurn();
             }
             else if (action === 'double') {
-                // Check funds (Simulated check for Host acting on behalf, real check done client side)
                 hand.bet *= 2;
-                p.totalBet += hand.bet; // Roughly track
+                p.totalBet += hand.bet; 
                 hand.cards.push(gameState.deck.pop());
                 hand.score = getScore(hand.cards);
                 hand.status = (hand.score > 21) ? 'BUST' : 'STAND';
                 nextTurn();
             }
             else if (action === 'split') {
-                // 1. Move 2nd card to new hand
                 const cardToMove = hand.cards.pop();
-                // 2. Create new hand
                 const newHand = { 
                     cards: [cardToMove], 
                     bet: hand.bet, 
                     status: 'PLAYING', 
                     result: '' 
                 };
-                // Add original card back to first hand (replaced the 2nd one? No, split means 2 hands)
-                // Actually logic: Hand 1 has [A, 10]. Hand 2 gets 10. Hand 1 keeps A.
-                // We need to deal 1 card to Hand 1 and 1 card to Hand 2 immediately usually.
-                // Let's do:
-                // Hand 1: [Card1] -> deal Card3
-                // Hand 2: [Card2] -> deal Card4
                 
-                hand.cards.push(gameState.deck.pop()); // Deal to hand 1
-                newHand.cards.push(gameState.deck.pop()); // Deal to hand 2
+                hand.cards.push(gameState.deck.pop()); 
+                newHand.cards.push(gameState.deck.pop()); 
                 
                 p.hands.push(newHand);
                 p.totalBet += hand.bet;
 
-                // Update Turn Queue: Insert the new hand immediately after current hand
-                // But first, let's check for Blackjack in new hands
                 calculateScores();
-                
-                // Recalculate queue completely to be safe
                 buildTurnQueue(); 
-                // Note: We need to find where the player is in queue and ensure they play both hands
-                // The simple buildTurnQueue handles this because it iterates all hands.
             }
 
             calculateScores();
@@ -729,7 +706,6 @@
         }
 
         function dealerPlay() {
-            // Dealer hits on soft 17? Let's stick to simple < 17
             while (gameState.dealerScore < 17) {
                 gameState.dealerHand.push(gameState.deck.pop());
                 gameState.dealerScore = getScore(gameState.dealerHand);
@@ -751,7 +727,6 @@
             });
             broadcastState();
             
-            // Auto restart
             setTimeout(() => { if(gameState.isHost) startBettingPhase(); }, 7000);
         }
 
@@ -778,7 +753,6 @@
         }
 
         function sendAction(act) {
-            // Find my current hand index
             const turn = gameState.turnQueue[0];
             if(turn && turn.playerId === myId) {
                 publishMessage({ type: 'ACTION', id: myId, action: act, handIndex: turn.handIndex });
@@ -808,10 +782,9 @@
                 const div = document.createElement('div');
                 div.className = `player-info ${isTurn ? 'active-turn' : ''}`;
 
-                // Payout Logic (Client Side Update)
                 if (isMe && gameState.phase === 'RESULT') {
                     p.hands.forEach(h => {
-                        if (h.result === 'PAID') return; // Already processed
+                        if (h.result === 'PAID') return;
                         let payout = 0;
                         if (h.result.includes('WIN')) {
                             payout = (h.result === 'WIN 3:2') ? h.bet * 2.5 : h.bet * 2;
@@ -820,7 +793,7 @@
                         }
                         if (payout > 0) {
                             myBankroll += payout;
-                            h.result = 'PAID'; // Mark as paid locally
+                            h.result = 'PAID';
                             saveBankroll();
                         }
                     });
@@ -838,7 +811,6 @@
                     statusText = results.length > 0 ? results.join(', ') : 'Paid';
                 }
 
-                // Generate Hand HTML
                 let handsHtml = '';
                 p.hands.forEach((h, hIdx) => {
                     const cardsHtml = h.cards.map(c => createCardEl(c).outerHTML).join('');
@@ -880,7 +852,6 @@
             const btnDouble = document.getElementById('btn-double');
             const btnSplit = document.getElementById('btn-split');
 
-            // Reset
             betC.style.display = 'none'; actC.style.display = 'none'; waitC.style.display = 'none';
 
             if (gameState.phase === 'BETTING') {
@@ -897,10 +868,8 @@
                     actC.style.display = 'flex';
                     const myHand = me.hands[turn.handIndex];
                     
-                    // Double Logic: Only 2 cards
                     btnDouble.disabled = (myHand.cards.length !== 2 || myBankroll < myHand.bet);
                     
-                    // Split Logic: 2 cards, same value, enough money
                     const canSplit = myHand.cards.length === 2 && 
                                      myHand.cards[0].value === myHand.cards[1].value && 
                                      myBankroll >= myHand.bet;
@@ -920,14 +889,24 @@
 
         function createCardEl(c, hidden=false) {
             const el = document.createElement('div');
-            el.className = `card ${hidden?'hidden':''} ${['♥','♦'].includes(c.suit)?'red':''} animate`;
+            const isRed = ['♥','♦'].includes(c.suit);
+            
+            el.className = `card ${hidden?'hidden':''} animate`;
             
             if(!hidden) {
-                const isRed = ['♥','♦'].includes(c.suit);
+                // Logic: Value is always White. Suit is Red or Gold.
                 el.innerHTML = `
-                    <div class="card-corner top-left"><div>${c.value}</div><div>${c.suit}</div></div>
-                    <div class="card-center ${isRed ? 'red' : ''}">${c.suit}</div>
-                    <div class="card-corner bottom-right"><div>${c.value}</div><div>${c.suit}</div></div>
+                    <div class="card-corner top-left">
+                        <div style="color:white; font-weight:bold;">${c.value}</div>
+                        <div class="${isRed ? 'suit-red' : 'suit-black'}">${c.suit}</div>
+                    </div>
+                    <div class="card-center">
+                        <div class="${isRed ? 'suit-red' : 'suit-black'}">${c.suit}</div>
+                    </div>
+                    <div class="card-corner bottom-right">
+                        <div style="color:white; font-weight:bold;">${c.value}</div>
+                        <div class="${isRed ? 'suit-red' : 'suit-black'}">${c.suit}</div>
+                    </div>
                 `;
             }
             return el;
