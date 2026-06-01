@@ -10,11 +10,11 @@
         :root {
             --felt-green: #2e7d32;
             --felt-dark: #1b5e20;
-            --gold: #FFD700; /* Bright Gold */
+            --gold: #FFD700;
             --gold-glow: rgba(255, 215, 0, 0.6);
-            --red: #ff3333; /* Bright Red */
+            --red: #ff3333;
             --black: #000000;
-            --card-bg: #000000; /* Pure Black */
+            --card-bg: #000000;
             --card-w: 110px;
             --card-h: 154px;
         }
@@ -32,6 +32,17 @@
             flex-direction: column;
         }
 
+        /* --- Z-INDEX LAYERING --- */
+        /* 1. Background */
+        main { z-index: 1; position: relative; }
+        /* 2. Game Elements */
+        #game-board { z-index: 10; position: relative; }
+        .card { z-index: 20; }
+        /* 3. UI Elements */
+        #controls-bar { z-index: 100; }
+        #toast { z-index: 300; }
+        #lobby-screen { z-index: 200; }
+
         /* --- Header --- */
         header {
             background: rgba(0,0,0,0.95);
@@ -40,7 +51,8 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 2px solid var(--gold);
-            z-index: 10;
+            position: relative;
+            z-index: 50;
         }
 
         .brand { font-size: 1.2rem; font-weight: bold; color: var(--gold); display: flex; align-items: center; gap: 10px;}
@@ -64,7 +76,6 @@
         main {
             flex: 1;
             background: radial-gradient(circle, var(--felt-green) 0%, var(--felt-dark) 100%);
-            position: relative;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -78,7 +89,7 @@
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; flex-direction: column;
             justify-content: center; align-items: center;
-            z-index: 20; backdrop-filter: blur(8px);
+            backdrop-filter: blur(8px);
         }
 
         .panel {
@@ -86,6 +97,7 @@
             box-shadow: 0 15px 40px rgba(0,0,0,0.8), 0 0 20px rgba(255, 215, 0, 0.1);
             text-align: center; border: 1px solid #444;
             width: 90%; max-width: 450px;
+            z-index: 201;
         }
         .panel h2 { margin-top: 0; color: var(--gold); text-transform: uppercase; letter-spacing: 2px;}
 
@@ -125,38 +137,55 @@
         /* --- Game Board --- */
         #game-board {
             width: 100%; max-width: 1200px; height: 100%;
-            display: none; flex-direction: column; padding: 10px 20px 100px 20px;
+            display: none; flex-direction: column; 
+            padding: 10px 20px 100px 20px;
         }
 
-        .area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
-        .dealer-area { justify-content: flex-start; padding-top: 10px; flex: 0.8; }
+        .area { 
+            flex: 1; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            position: relative;
+            min-height: 200px; /* Prevent collapse */
+        }
+        .dealer-area { justify-content: flex-start; padding-top: 60px; flex: 0.8; }
         .players-area { justify-content: flex-end; flex: 1.2; }
 
+        /* FIXED: Removed negative gap, kept negative margin */
         .hand-container { 
-            display: flex; gap: -40px;
+            display: flex; 
             justify-content: center; 
-            height: var(--card-h); 
+            align-items: center;
+            min-height: var(--card-h); /* Critical to keep container visible */
             margin-top: 10px;
+            position: relative;
         }
         
         .split-wrapper {
             display: flex;
             flex-direction: column;
             gap: 20px;
+            width: 100%;
+            align-items: center;
         }
 
         .score-bubble {
             background: rgba(0,0,0,0.8); padding: 5px 15px;
             border-radius: 20px; font-size: 1rem; margin-bottom: 10px;
             color: var(--gold); font-weight: bold; border: 1px solid #444;
+            z-index: 25;
         }
 
         .player-info {
             display: flex; flex-direction: column; align-items: center;
             margin: 5px; background: rgba(0,0,0,0.2);
-            padding: 10px; border-radius: 12px; width: 100%; max-width: 600px;
+            padding: 15px; border-radius: 12px; width: 100%; max-width: 600px;
             transition: background 0.3s;
             border: 1px solid transparent;
+            position: relative;
+            z-index: 25;
         }
         .player-info.active-turn { 
             background: rgba(255, 215, 0, 0.15); 
@@ -167,23 +196,26 @@
         .player-info .bet-amount { font-size: 0.9rem; color: #ddd; }
         .player-info .status-text { font-size: 0.85rem; font-style: italic; min-height: 1.2em; margin-top: 5px;}
 
-        /* --- Card Styles (FIXED FOR VISIBILITY) --- */
+        /* --- Card Styles --- */
         .card {
             width: var(--card-w); height: var(--card-h);
             background: var(--card-bg); 
             border-radius: 10px;
             border: 2px solid var(--gold);
-            color: #fff; /* Default Text White */
+            color: #fff; 
             font-weight: bold;
             position: relative; 
             box-shadow: 5px 5px 15px rgba(0,0,0,0.8);
             display: flex; justify-content: center; align-items: center;
             font-size: 2rem; 
             flex-shrink: 0;
-            margin-right: -40px;
+            /* Overlap logic: Negative margin moves it left */
+            margin-right: -40px; 
             transition: transform 0.3s;
             user-select: none;
         }
+        /* Stop the last card from being pushed too far left if needed, 
+           but usually we want it flush. */
         .card:last-child { margin-right: 0; }
         
         .card::before {
@@ -203,12 +235,11 @@
         .card-center { font-size: 3rem; font-weight: 900; }
 
         @keyframes deal { 
-            0% { transform: translateY(-200px) scale(0.5) rotate(10deg); opacity: 0; } 
+            0% { transform: translateY(-300px) scale(0.5) rotate(10deg); opacity: 0; } 
             100% { transform: translateY(0) scale(1) rotate(0); opacity: 1; } 
         }
-        .card.animate { animation: deal 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .card.animate { animation: deal 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         
-        /* Suit Colors */
         .suit-red { color: var(--red); text-shadow: 0 0 5px rgba(255, 51, 51, 0.5); }
         .suit-black { color: var(--gold); text-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
 
@@ -227,7 +258,7 @@
             position: absolute; bottom: 0; left: 0; width: 100%;
             background: rgba(10,10,10,0.95); padding: 15px 20px;
             display: flex; justify-content: center; gap: 15px;
-            border-top: 1px solid #333; z-index: 100;
+            border-top: 1px solid #333;
             box-shadow: 0 -5px 20px rgba(0,0,0,0.8);
         }
         .game-btn {
@@ -271,7 +302,7 @@
             transform: translateX(-50%); background: rgba(0,0,0,0.95);
             color: var(--gold); padding: 12px 25px; border-radius: 4px;
             border: 1px solid var(--gold); opacity: 0; pointer-events: none;
-            transition: opacity 0.3s; z-index: 300; font-weight: bold;
+            transition: opacity 0.3s; font-weight: bold;
             text-transform: uppercase; letter-spacing: 1px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
@@ -280,7 +311,7 @@
 
         @media (max-width: 600px) {
             :root { --card-w: 70px; --card-h: 98px; }
-            .card { font-size: 1.2rem; margin-right: -30px; }
+            .card { font-size: 1.2rem; margin-right: -25px; }
             .card-center { font-size: 1.8rem; }
             .btn-double, .btn-split { display: none; } 
             .btn-hit, .btn-stand { flex: 1; max-width: none; }
@@ -382,7 +413,7 @@
     <script>
         /* --- Configuration --- */
         const BROKER_URL = 'wss://broker.emqx.io:8084/mqtt';
-        const TOPIC_PREFIX = 'blackjack/premium/v3/';
+        const TOPIC_PREFIX = 'blackjack/premium/v4/';
         
         /* --- Game State --- */
         let gameState = {
@@ -894,7 +925,6 @@
             el.className = `card ${hidden?'hidden':''} animate`;
             
             if(!hidden) {
-                // Logic: Value is always White. Suit is Red or Gold.
                 el.innerHTML = `
                     <div class="card-corner top-left">
                         <div style="color:white; font-weight:bold;">${c.value}</div>
