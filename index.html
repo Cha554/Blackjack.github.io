@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Global Multiplayer Blackjack</title>
+    <title>Global Blackjack Premium</title>
     <!-- MQTT Library for Public API Communication -->
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <style>
@@ -11,14 +11,15 @@
             --felt-green: #2e7d32;
             --felt-dark: #1b5e20;
             --gold: #ffd700;
+            --gold-dim: #b8860b;
             --red: #d32f2f;
-            --black: #212121;
-            --white: #ffffff;
-            --card-w: 80px;
-            --card-h: 112px;
+            --black: #000000;
+            --card-bg: #111;
+            --card-w: 110px; /* Bigger Cards */
+            --card-h: 154px; /* Bigger Cards */
         }
 
-        * { box-sizing: border-box; user-select: none; }
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
         
         body {
             margin: 0;
@@ -33,7 +34,7 @@
 
         /* --- Header --- */
         header {
-            background: rgba(0,0,0,0.9);
+            background: rgba(0,0,0,0.95);
             padding: 10px 20px;
             display: flex;
             justify-content: space-between;
@@ -48,13 +49,16 @@
 
         .stats-bar { display: flex; gap: 15px; align-items: center; }
         .chip-display {
-            background: #333; padding: 5px 12px; border-radius: 20px;
+            background: #222; padding: 6px 15px; border-radius: 25px;
             border: 1px solid var(--gold); color: var(--gold); font-weight: bold;
+            font-family: monospace; font-size: 1.1rem;
+            box-shadow: 0 0 5px rgba(255, 215, 0, 0.2);
         }
         button.reset-btn {
-            background: var(--red); border: none; color: white;
-            padding: 5px 10px; border-radius: 4px; cursor: pointer;
+            background: #333; border: 1px solid #555; color: #aaa;
+            padding: 5px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;
         }
+        button.reset-btn:hover { color: white; border-color: white; }
 
         /* --- Main Layout --- */
         main {
@@ -70,134 +74,220 @@
 
         /* --- Lobby Screen --- */
         #lobby-screen {
-            background: rgba(0,0,0,0.9);
+            background: rgba(0,0,0,0.95);
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; flex-direction: column;
             justify-content: center; align-items: center;
-            z-index: 20; backdrop-filter: blur(5px);
+            z-index: 20; backdrop-filter: blur(8px);
         }
 
         .panel {
-            background: #222; padding: 30px; border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            text-align: center; border: 1px solid #444;
-            width: 90%; max-width: 400px;
+            background: linear-gradient(145deg, #1a1a1a, #222); padding: 30px; border-radius: 16px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.8), 0 0 20px rgba(255, 215, 0, 0.1);
+            text-align: center; border: 1px solid var(--gold-dim);
+            width: 90%; max-width: 450px;
         }
-        .panel h2 { margin-top: 0; color: var(--gold); }
+        .panel h2 { margin-top: 0; color: var(--gold); text-transform: uppercase; letter-spacing: 2px;}
 
         input {
-            width: 100%; padding: 12px; margin: 10px 0;
-            background: #333; border: 1px solid #555; color: white;
-            border-radius: 6px; font-size: 1rem; text-align: center;
-            text-transform: uppercase; letter-spacing: 2px;
+            width: 100%; padding: 14px; margin: 10px 0;
+            background: #111; border: 1px solid #444; color: var(--gold);
+            border-radius: 8px; font-size: 1.1rem; text-align: center;
+            text-transform: uppercase; letter-spacing: 2px; font-weight: bold;
+            outline: none; transition: border 0.3s;
         }
+        input:focus { border-color: var(--gold); }
 
         .btn-primary {
-            width: 100%; padding: 12px; background: var(--gold); color: var(--black);
-            border: none; font-weight: bold; font-size: 1rem;
-            border-radius: 6px; cursor: pointer; transition: transform 0.1s;
+            width: 100%; padding: 14px; background: linear-gradient(to bottom, var(--gold), var(--gold-dim)); color: var(--black);
+            border: none; font-weight: bold; font-size: 1.1rem;
+            border-radius: 8px; cursor: pointer; transition: transform 0.1s, filter 0.2s;
+            text-transform: uppercase;
         }
+        .btn-primary:hover { filter: brightness(1.1); }
         .btn-primary:active { transform: scale(0.98); }
-        .btn-primary:disabled { background: #555; cursor: wait; }
+        .btn-primary:disabled { background: #444; color: #888; cursor: wait; }
 
         .room-code-display {
-            font-size: 3rem; font-weight: bold; letter-spacing: 5px;
+            font-size: 3rem; font-weight: 800; letter-spacing: 5px;
             color: var(--gold); margin: 20px 0;
-            border: 2px dashed #555; padding: 10px;
+            border: 2px dashed #444; padding: 10px;
+            text-shadow: 0 0 10px rgba(255,215,0,0.3);
         }
 
         .player-list {
-            margin-top: 20px; text-align: left; background: #333;
-            padding: 10px; border-radius: 6px; max-height: 150px; overflow-y: auto;
+            margin-top: 20px; text-align: left; background: rgba(0,0,0,0.5);
+            padding: 10px; border-radius: 8px; max-height: 150px; overflow-y: auto;
+            border: 1px solid #333;
         }
-        .player-list div { padding: 5px; border-bottom: 1px solid #444; font-size: 0.9rem;}
+        .player-list div { padding: 8px; border-bottom: 1px solid #333; font-size: 0.9rem; color: #ccc;}
 
         /* --- Game Board --- */
         #game-board {
-            width: 100%; max-width: 1000px; height: 100%;
-            display: none; flex-direction: column; padding: 20px;
+            width: 100%; max-width: 1200px; height: 100%;
+            display: none; flex-direction: column; padding: 10px 20px 100px 20px; /* Bottom padding for controls */
         }
 
         .area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
-        .dealer-area { justify-content: flex-start; padding-top: 20px; }
-        .players-area { justify-content: flex-end; padding-bottom: 80px; }
+        .dealer-area { justify-content: flex-start; padding-top: 10px; flex: 0.8; }
+        .players-area { justify-content: flex-end; flex: 1.2; }
 
-        .hand-container { display: flex; gap: 5px; justify-content: center; height: var(--card-h); margin-top: 10px; }
+        .hand-container { 
+            display: flex; gap: -40px; /* Overlap cards slightly */
+            justify-content: center; 
+            height: var(--card-h); 
+            margin-top: 10px;
+        }
         
+        /* Specific container for split hands to stack them vertically */
+        .split-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
         .score-bubble {
-            background: rgba(0,0,0,0.6); padding: 4px 10px;
-            border-radius: 10px; font-size: 0.9rem; margin-bottom: 5px;
+            background: rgba(0,0,0,0.8); padding: 5px 15px;
+            border-radius: 20px; font-size: 1rem; margin-bottom: 10px;
+            color: var(--gold); font-weight: bold; border: 1px solid #444;
         }
 
         .player-info {
             display: flex; flex-direction: column; align-items: center;
-            margin: 5px; background: rgba(0,0,0,0.3);
-            padding: 8px; border-radius: 8px; width: 180px;
+            margin: 5px; background: rgba(0,0,0,0.2);
+            padding: 10px; border-radius: 12px; width: 100%; max-width: 600px;
             transition: background 0.3s;
+            border: 1px solid transparent;
         }
-        .player-info.active-turn { background: rgba(255, 215, 0, 0.2); border: 1px solid var(--gold); }
-        .player-info .name { font-weight: bold; color: var(--gold); }
-        .player-info .bet { font-size: 0.8rem; color: #ddd; }
-        .player-info .status { font-size: 0.8rem; font-style: italic; height: 1.2em; }
+        .player-info.active-turn { 
+            background: rgba(255, 215, 0, 0.15); 
+            border: 1px solid var(--gold); 
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.1);
+        }
+        .player-info .name { font-weight: bold; color: var(--gold); font-size: 1.1rem; }
+        .player-info .bet-amount { font-size: 0.9rem; color: #ddd; }
+        .player-info .status-text { font-size: 0.85rem; font-style: italic; min-height: 1.2em; margin-top: 5px;}
 
         /* --- Card Styles --- */
         .card {
             width: var(--card-w); height: var(--card-h);
-            background: white; border-radius: 6px;
-            color: black; font-weight: bold;
-            position: relative; box-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+            background: var(--card-bg); 
+            border-radius: 10px;
+            border: 2px solid var(--gold);
+            color: var(--gold); 
+            font-weight: bold;
+            position: relative; 
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.8), inset 0 0 20px rgba(255, 215, 0, 0.1);
             display: flex; justify-content: center; align-items: center;
-            font-size: 1.5rem; animation: deal 0.4s ease-out;
+            font-size: 2rem; 
             flex-shrink: 0;
+            margin-right: -40px; /* Card overlap effect */
+            transition: transform 0.3s;
         }
-        @keyframes deal { from { transform: translateY(-50px) scale(0.5); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
-        .card.red { color: var(--red); }
+        .card:last-child { margin-right: 0; }
+        
+        /* Card Design Details */
+        .card::before {
+            content: ''; position: absolute; top: 5px; left: 5px; right: 5px; bottom: 5px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 6px;
+            pointer-events: none;
+        }
+        .card-corner {
+            position: absolute; display: flex; flex-direction: column; align-items: center;
+            font-size: 0.9rem; line-height: 1;
+        }
+        .top-left { top: 8px; left: 8px; }
+        .bottom-right { bottom: 8px; right: 8px; transform: rotate(180deg); }
+
+        .card-center { font-size: 2.5rem; }
+
+        @keyframes deal { 
+            0% { transform: translateY(-200px) scale(0.5) rotate(10deg); opacity: 0; } 
+            100% { transform: translateY(0) scale(1) rotate(0); opacity: 1; } 
+        }
+        .card.animate { animation: deal 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        
+        .card.red { color: var(--red); border-color: var(--red); }
+        .card.red::before { border-color: rgba(211, 47, 47, 0.3); }
+        .card.red .gold-accent { color: var(--gold); }
+
         .card.hidden {
-            background: repeating-linear-gradient(45deg, #b71c1c, #b71c1c 10px, #8e0000 10px, #8e0000 20px);
-            border: 2px solid white;
+            background: repeating-linear-gradient(45deg, #111, #111 10px, #222 10px, #222 20px);
+            border: 2px solid var(--gold);
+        }
+        .card.hidden * { display: none; }
+        .card.hidden::after {
+            content: '♠♥♣♦'; color: var(--gold-dim); opacity: 0.2;
+            font-size: 1.5rem; transform: rotate(45deg);
         }
 
         /* --- Controls --- */
         #controls-bar {
             position: absolute; bottom: 0; left: 0; width: 100%;
-            background: #222; padding: 15px;
+            background: rgba(10,10,10,0.95); padding: 15px 20px;
             display: flex; justify-content: center; gap: 15px;
-            border-top: 1px solid #444; z-index: 100;
+            border-top: 1px solid #333; z-index: 100;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.8);
         }
         .game-btn {
-            padding: 12px 24px; border: none; border-radius: 50px;
+            flex: 1; max-width: 120px;
+            padding: 15px 10px; border: none; border-radius: 50px;
             font-weight: bold; font-size: 1rem; cursor: pointer; text-transform: uppercase;
+            color: white; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
-        .btn-hit { background: #4caf50; color: white; }
-        .btn-stand { background: #f44336; color: white; }
-        .btn-deal { background: var(--gold); color: black; }
+        .game-btn:active { transform: translateY(2px); box-shadow: none; }
+        .game-btn:disabled { opacity: 0.3; cursor: not-allowed; transform: none; box-shadow: none; }
 
-        .bet-control { display: none; flex-direction: column; align-items: center; gap: 5px; width: 100%; }
-        .chip-selector { display: flex; gap: 10px; margin-bottom: 5px; }
+        .btn-hit { background: linear-gradient(135deg, #43a047, #2e7d32); }
+        .btn-stand { background: linear-gradient(135deg, #e53935, #c62828); }
+        .btn-double { background: linear-gradient(135deg, #1e88e5, #1565c0); }
+        .btn-split { background: linear-gradient(135deg, #8e24aa, #6a1b9a); }
+        .btn-deal { background: linear-gradient(135deg, var(--gold), var(--gold-dim)); color: black; max-width: 200px; flex: 2;}
+
+        .bet-control { display: none; flex-direction: row; align-items: center; justify-content: center; gap: 20px; width: 100%; }
+        
+        .chip-selector { display: flex; gap: 15px; align-items: center; }
         .chip {
-            width: 45px; height: 45px; border-radius: 50%;
+            width: 55px; height: 55px; border-radius: 50%;
             border: 4px dashed white; display: flex;
             justify-content: center; align-items: center;
-            font-size: 0.7rem; font-weight: bold; cursor: pointer;
-            color: white; box-shadow: 0 3px 5px rgba(0,0,0,0.5);
+            font-size: 0.8rem; font-weight: bold; cursor: pointer;
+            color: white; box-shadow: 0 5px 10px rgba(0,0,0,0.5);
+            transition: transform 0.2s;
         }
-        .chip.c10 { background: #1976d2; }
-        .chip.c50 { background: #7b1fa2; }
-        .chip.c100 { background: #d32f2f; }
+        .chip:active { transform: scale(0.9); }
+        .chip.c10 { background: #1565c0; border-color: #64b5f6; }
+        .chip.c50 { background: #6a1b9a; border-color: #ba68c8; }
+        .chip.c100 { background: #c62828; border-color: #ef5350; }
+        
+        .current-bet-box {
+            background: #222; border: 1px solid var(--gold); color: var(--gold);
+            padding: 10px 20px; border-radius: 8px; font-weight: bold; min-width: 100px; text-align: center;
+        }
 
         #toast {
-            position: fixed; top: 70px; left: 50%;
-            transform: translateX(-50%); background: rgba(0,0,0,0.9);
-            color: var(--gold); padding: 10px 20px; border-radius: 30px;
+            position: fixed; top: 80px; left: 50%;
+            transform: translateX(-50%); background: rgba(0,0,0,0.95);
+            color: var(--gold); padding: 12px 25px; border-radius: 4px;
             border: 1px solid var(--gold); opacity: 0; pointer-events: none;
             transition: opacity 0.3s; z-index: 300; font-weight: bold;
+            text-transform: uppercase; letter-spacing: 1px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
 
+        /* Action Buttons Layout */
+        .action-group { display: flex; gap: 10px; width: 100%; max-width: 500px; justify-content: center;}
+
         @media (max-width: 600px) {
-            :root { --card-w: 50px; --card-h: 70px; }
-            .players-area { flex-direction: column; overflow-y: scroll; padding-bottom: 100px; }
-            .player-info { flex-direction: row; justify-content: space-between; width: 100%; }
-            .hand-container { height: var(--card-h); }
+            :root { --card-w: 70px; --card-h: 98px; }
+            .card { font-size: 1.2rem; margin-right: -30px; }
+            .card-center { font-size: 1.5rem; }
+            .btn-double, .btn-split { display: none; } /* Hide complex buttons on very small screens to save space */
+            .btn-hit, .btn-stand { flex: 1; max-width: none; }
+        }
+        @media (min-width: 601px) {
+            .btn-double, .btn-split { display: block; }
         }
     </style>
 </head>
@@ -205,12 +295,12 @@
 
     <header>
         <div class="brand">
-            <span>♠ Global Blackjack</span>
+            <span>♠ ROYAL BLACKJACK</span>
             <span id="conn-status" class="connection-status">Connecting...</span>
         </div>
         <div class="stats-bar">
             <div>Bank: <span id="bankroll" class="chip-display">$1000</span></div>
-            <button class="reset-btn" onclick="resetBankroll()">Reset</button>
+            <button class="reset-btn" onclick="resetBankroll()">Reset Funds</button>
         </div>
     </header>
 
@@ -220,28 +310,28 @@
         <!-- Lobby Screen -->
         <section id="lobby-screen">
             <div class="panel" id="join-panel">
-                <h2>Join / Create Room</h2>
-                <input type="text" id="username" placeholder="Your Name" maxlength="10">
+                <h2>Join Table</h2>
+                <input type="text" id="username" placeholder="Player Name" maxlength="12">
                 <input type="text" id="room-code-input" placeholder="Room Code (ABCD)" maxlength="4" style="text-transform: uppercase;">
-                <button class="btn-primary" id="btn-join" onclick="joinRoom()">Join Game</button>
-                <button class="btn-primary" style="background:#555; margin-top:10px;" onclick="createRoom()">Create New Room</button>
-                <div style="margin-top:15px; font-size:0.75rem; color:#aaa; line-height:1.4;">
-                    * Uses Public MQTT Broker.<br>
-                    Codes are global. Use random codes to avoid conflicts.
+                <button class="btn-primary" id="btn-join" onclick="joinRoom()">Join Room</button>
+                <button class="btn-primary" style="background:#222; color:white; border:1px solid #444; margin-top:10px;" onclick="createRoom()">Create New Room</button>
+                <div style="margin-top:20px; font-size:0.75rem; color:#666; line-height:1.4;">
+                    * Global Multiplayer via Public MQTT.<br>
+                    Use unique Room Codes.
                 </div>
             </div>
 
             <div class="panel" id="host-panel" style="display:none;">
-                <h2>Room Created</h2>
-                <p>Share this code:</p>
+                <h2>Lobby</h2>
+                <p style="color:#888;">Share this code with friends:</p>
                 <div class="room-code-display" id="generated-code">----</div>
                 <div class="player-list" id="lobby-player-list">
                     <div>Waiting for players...</div>
                 </div>
                 <div style="margin-top: 20px;">
-                    <button class="btn-primary" id="start-btn" onclick="hostStartGame()" disabled>Start Game</button>
+                    <button class="btn-primary" id="start-btn" onclick="hostStartGame()">Start Game</button>
                 </div>
-                <button class="btn-primary" style="background:#555; margin-top:10px;" onclick="location.reload()">Leave</button>
+                <button class="btn-primary" style="background:#222; color:white; border:1px solid #444; margin-top:10px;" onclick="location.reload()">Leave</button>
             </div>
         </section>
 
@@ -251,31 +341,37 @@
                 <div class="score-bubble" id="dealer-score">Dealer: 0</div>
                 <div class="hand-container" id="dealer-hand"></div>
             </div>
-            <div style="height: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); width: 80%;"></div>
+            
             <div class="area players-area" id="players-container"></div>
         </section>
 
         <!-- Controls -->
         <footer id="controls-bar">
+            
+            <!-- Betting Phase -->
             <div id="betting-controls" class="bet-control">
-                <div style="color:white; font-weight:bold;">Place Your Bet</div>
                 <div class="chip-selector">
-                    <div class="chip c10" onclick="setBet(10)">$10</div>
-                    <div class="chip c50" onclick="setBet(50)">$50</div>
-                    <div class="chip c100" onclick="setBet(100)">$100</div>
+                    <div class="chip c10" onclick="adjustBet(10)">$10</div>
+                    <div class="chip c50" onclick="adjustBet(50)">$50</div>
+                    <div class="chip c100" onclick="adjustBet(100)">$100</div>
+                    <button class="reset-btn" onclick="adjustBet('clear')" style="height:55px; border-radius:50%; width:55px; border-color:#d32f2f; color:#d32f2f;">X</button>
                 </div>
-                <div style="color:#aaa;">Current: $<span id="current-bet-display">0</span></div>
-                <button class="game-btn btn-deal" onclick="submitBet()">Deal Cards</button>
+                <div class="current-bet-box">Bet: $<span id="current-bet-display">0</span></div>
+                <button class="game-btn btn-deal" onclick="submitBet()">DEAL CARDS</button>
             </div>
 
-            <div id="action-controls" style="display:none;">
-                <button class="game-btn btn-hit" onclick="sendAction('hit')">Hit</button>
-                <button class="game-btn btn-stand" onclick="sendAction('stand')">Stand</button>
+            <!-- Playing Phase -->
+            <div id="action-controls" class="action-group" style="display:none;">
+                <button class="game-btn btn-hit" id="btn-hit" onclick="sendAction('hit')">Hit</button>
+                <button class="game-btn btn-stand" id="btn-stand" onclick="sendAction('stand')">Stand</button>
+                <button class="game-btn btn-double" id="btn-double" onclick="sendAction('double')">Double</button>
+                <button class="game-btn btn-split" id="btn-split" onclick="sendAction('split')">Split</button>
             </div>
 
-            <div id="waiting-controls" style="display:none; color: white; align-items: center; gap: 10px;">
-                <div style="width:20px; height:20px; border:3px solid #fff; border-top:3px solid transparent; border-radius:50%; animation:spin 1s linear infinite;"></div>
-                <span id="waiting-text">Waiting...</span>
+            <!-- Waiting Phase -->
+            <div id="waiting-controls" style="display:none; color: white; align-items: center; gap: 15px;">
+                <div style="width:24px; height:24px; border:3px solid #555; border-top:3px solid var(--gold); border-radius:50%; animation:spin 1s linear infinite;"></div>
+                <span id="waiting-text" style="font-weight:bold; color:#aaa;">Waiting...</span>
             </div>
         </footer>
     </main>
@@ -287,7 +383,7 @@
     <script>
         /* --- Configuration --- */
         const BROKER_URL = 'wss://broker.emqx.io:8084/mqtt';
-        const TOPIC_PREFIX = 'blackjack/global/v1/'; // Unique prefix to avoid collisions
+        const TOPIC_PREFIX = 'blackjack/premium/v2/';
         
         /* --- Game State --- */
         let gameState = {
@@ -296,14 +392,14 @@
             deck: [],
             dealerHand: [],
             players: [],
-            currentPlayerIndex: 0,
+            turnQueue: [], // { playerId, handIndex }
             isHost: false
         };
 
         let myId = 'p_' + Math.random().toString(36).substr(2, 9);
         let myName = '';
         let myBankroll = 1000;
-        let currentBet = 0;
+        let currentBetInput = 0;
         let client = null;
         let mqttTopic = '';
 
@@ -312,7 +408,6 @@
             const saved = localStorage.getItem('bj_bankroll');
             if (saved !== null) myBankroll = parseInt(saved, 10);
             updateBankrollUI();
-            checkBankruptcy();
         };
 
         function saveBankroll() {
@@ -324,24 +419,11 @@
             document.getElementById('bankroll').textContent = '$' + myBankroll;
         }
 
-        function checkBankruptcy() {
-            if (myBankroll <= 0) showToast("Bankrupt! Reset to continue.");
-        }
-
-        function resetBankroll() {
-            if(confirm("Reset money to $1000?")) {
-                myBankroll = 1000;
-                saveBankroll();
-                showToast("Bankroll reset!");
-                document.getElementById('betting-controls').style.display = 'flex';
-            }
-        }
-
-        function showToast(msg) {
+        function showToast(msg, duration=3000) {
             const t = document.getElementById('toast');
             t.innerText = msg;
             t.style.opacity = 1;
-            setTimeout(() => t.style.opacity = 0, 3000);
+            setTimeout(() => t.style.opacity = 0, duration);
         }
 
         /* --- MQTT / Networking Layer --- */
@@ -349,37 +431,27 @@
             gameState.roomCode = code.toUpperCase();
             mqttTopic = TOPIC_PREFIX + gameState.roomCode;
             
-            const clientId = 'blackjack_client_' + myId;
+            const clientId = 'bj_client_' + myId;
             client = mqtt.connect(BROKER_URL, { clientId: clientId, clean: true });
 
             client.on('connect', () => {
-                console.log("Connected to MQTT Broker");
                 document.getElementById('conn-status').textContent = 'Online';
                 document.getElementById('conn-status').classList.add('status-online');
                 
-                // Subscribe to room
                 client.subscribe(mqttTopic, (err) => {
                     if (!err) {
-                        // Announce presence
                         publishMessage({ type: 'JOIN', id: myId, name: myName });
-                        
-                        // Request state from existing host (if any)
                         publishMessage({ type: 'REQUEST_STATE' });
                     }
                 });
             });
 
             client.on('message', (topic, message) => {
-                if (topic.toString() !== mqttTopic) return;
                 const data = JSON.parse(message.toString());
                 handleNetworkMessage(data);
             });
 
-            client.on('error', (err) => {
-                console.error("MQTT Error:", err);
-                showToast("Connection Error");
-            });
-            
+            client.on('error', () => showToast("Connection Error"));
             client.on('offline', () => {
                 document.getElementById('conn-status').textContent = 'Offline';
                 document.getElementById('conn-status').classList.remove('status-online');
@@ -393,35 +465,31 @@
         }
 
         function handleNetworkMessage(data) {
-            // Filter out my own messages if necessary (handled by game logic mostly)
-            
             if (data.type === 'REQUEST_STATE') {
-                // If I am host and have a state, send it back
                 if (gameState.isHost && gameState.phase !== 'LOBBY') {
-                    // Wait a tiny bit to ensure the requester is subbed
-                    setTimeout(() => publishMessage({ type: 'STATE_SYNC', payload: gameState }), 500);
+                    setTimeout(() => publishMessage({ type: 'STATE_SYNC', payload: gameState }), 200);
                 }
             }
             else if (data.type === 'STATE_SYNC' || data.type === 'GAME_UPDATE') {
-                // Accept state from Host
                 gameState = data.payload;
                 renderGame();
             }
             else if (data.type === 'ACTION' || data.type === 'BET') {
-                // Only Host processes actions to prevent race conditions
                 if (gameState.isHost) {
-                    if (data.type === 'ACTION') handleHostAction(data.id, data.action);
+                    if (data.type === 'ACTION') handleHostAction(data.id, data.action, data.handIndex);
                     if (data.type === 'BET') handleHostBet(data.id, data.amount);
                 }
             }
             else if (data.type === 'JOIN') {
-                // If I am Host in lobby, update my list (visual only, state sent on join usually)
-                // But for simplicity, we rely on state syncs.
-                if (gameState.isHost && gameState.phase === 'LOBBY') {
-                    // Add player to list if not exists
+                if (gameState.isHost) {
                     if (!gameState.players.find(p => p.id === data.id)) {
-                        gameState.players.push({ id: data.id, name: data.name, hand:[], score:0, bet:0, status:'WAITING', result:'' });
+                        gameState.players.push({ 
+                            id: data.id, name: data.name, 
+                            hands: [], // Array of hand objects {cards:[], bet:0, status:'WAITING'}
+                            totalBet: 0 
+                        });
                         broadcastState();
+                        if(gameState.phase === 'LOBBY') updateLobbyUI();
                     }
                 }
             }
@@ -434,19 +502,18 @@
         /* --- Lobby Logic --- */
         function createRoom() {
             const name = document.getElementById('username').value.trim();
-            if (!name) return showToast("Enter a name");
-
+            if (!name) return showToast("Enter your name");
             myName = name;
             gameState.isHost = true;
-            gameState.players.push({ id: myId, name: myName, hand:[], score:0, bet:0, status:'WAITING', result:'' });
             
-            // Generate 4 letter code
-            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // No I, O, 1, 0 to avoid confusion
+            // Add self
+            gameState.players.push({ id: myId, name: myName, hands: [], totalBet: 0 });
+            
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
             let code = '';
             for(let i=0; i<4; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
 
             connectMQTT(code);
-
             document.getElementById('join-panel').style.display = 'none';
             document.getElementById('host-panel').style.display = 'block';
             document.getElementById('generated-code').textContent = code;
@@ -456,30 +523,21 @@
         function joinRoom() {
             const name = document.getElementById('username').value.trim();
             const code = document.getElementById('room-code-input').value.trim().toUpperCase();
-            
-            if (!name) return showToast("Enter a name");
+            if (!name) return showToast("Enter name");
             if (code.length !== 4) return showToast("Invalid code");
-
+            
             myName = name;
             gameState.isHost = false;
-            
             connectMQTT(code);
             
             document.getElementById('lobby-screen').style.display = 'none';
             document.getElementById('game-board').style.display = 'flex';
-            
-            // Initial render waiting for host state
-            renderGame(); 
         }
 
         function updateLobbyUI() {
             const list = document.getElementById('lobby-player-list');
-            if(gameState.players.length === 0) list.innerHTML = '<div>Waiting...</div>';
-            else list.innerHTML = gameState.players.map(p => `<div>${p.name} ${p.id === myId ? '(You)' : ''}</div>`).join('');
-            
-            const btn = document.getElementById('start-btn');
-            btn.disabled = gameState.players.length < 1; // Host can play alone or wait for friends
-            btn.innerText = gameState.players.length > 1 ? "Start Game" : "Play Solo (Start)";
+            list.innerHTML = gameState.players.map(p => `<div>${p.name} ${p.id === myId ? '(You)' : ''}</div>`).join('');
+            document.getElementById('start-btn').disabled = false;
         }
 
         function hostStartGame() {
@@ -491,7 +549,6 @@
             let deck = [];
             const suits = ['♠', '♥', '♣', '♦'];
             const values = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
-            
             for (let s of suits) {
                 for (let v of values) {
                     let weight = parseInt(v);
@@ -500,7 +557,7 @@
                     deck.push({ suit: s, value: v, weight: weight });
                 }
             }
-            // Shuffle
+            // Fisher-Yates Shuffle
             for (let i = deck.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [deck[i], deck[j]] = [deck[j], deck[i]];
@@ -512,24 +569,26 @@
             gameState.deck = createDeck();
             gameState.dealerHand = [];
             gameState.players.forEach(p => {
-                p.hand = []; p.bet = 0; p.status = 'BETTING'; p.result = ''; p.score = 0;
+                p.hands = [];
+                p.totalBet = 0;
             });
             gameState.phase = 'BETTING';
-            gameState.currentPlayerIndex = 0;
+            gameState.turnQueue = [];
 
             document.getElementById('host-panel').style.display = 'none';
             document.getElementById('game-board').style.display = 'flex';
-            
             broadcastState();
-            renderGame();
         }
 
         function handleHostBet(pid, amount) {
             const p = gameState.players.find(pl => pl.id === pid);
-            if (p && p.status === 'BETTING') {
-                p.bet = amount;
-                p.status = 'READY';
-                if (gameState.players.every(pl => pl.bet > 0)) {
+            if (p) {
+                // Create the first hand structure with the bet
+                p.hands = [{ cards: [], bet: amount, status: 'WAITING', result: '' }];
+                p.totalBet = amount;
+                
+                // If all players have bet (hands array is not empty)
+                if (gameState.players.every(pl => pl.hands.length > 0)) {
                     dealInitialCards();
                 }
                 broadcastState();
@@ -538,18 +597,32 @@
 
         function dealInitialCards() {
             gameState.phase = 'PLAYING';
-            for(let i=0; i<2; i++) {
-                gameState.players.forEach(p => p.hand.push(gameState.deck.pop()));
-                gameState.dealerHand.push(gameState.deck.pop());
-            }
+            
+            // Deal 2 cards to each active hand
+            gameState.players.forEach(p => {
+                p.hands.forEach(h => {
+                    h.cards.push(gameState.deck.pop());
+                    h.cards.push(gameState.deck.pop());
+                });
+            });
+
+            // Deal Dealer Cards
+            gameState.dealerHand.push(gameState.deck.pop());
+            gameState.dealerHand.push(gameState.deck.pop());
+
             calculateScores();
-            gameState.players.forEach(p => { if (p.score === 21) p.status = 'BLACKJACK'; });
-            advanceTurn();
+            buildTurnQueue();
             broadcastState();
         }
 
         function calculateScores() {
-            gameState.players.forEach(p => p.score = getScore(p.hand));
+            gameState.players.forEach(p => {
+                p.hands.forEach(h => {
+                    h.score = getScore(h.cards);
+                    if (h.score === 21 && h.cards.length === 2) h.status = 'BLACKJACK';
+                    else if (h.score > 21) h.status = 'BUST';
+                });
+            });
             gameState.dealerScore = getScore(gameState.dealerHand);
         }
 
@@ -560,42 +633,103 @@
             return sum;
         }
 
-        function advanceTurn() {
-            const active = gameState.players.filter(p => ['PLAYING','HIT'].includes(p.status));
-            if (active.length === 0) {
-                dealerPlay();
-            } else {
-                if (gameState.currentPlayerIndex >= gameState.players.length) gameState.currentPlayerIndex = 0;
-                let p = gameState.players[gameState.currentPlayerIndex];
-                if (['BLACKJACK','BUST','STAND'].includes(p.status)) {
-                    gameState.currentPlayerIndex++;
-                    advanceTurn();
-                } else {
-                    p.status = 'PLAYING';
-                }
-            }
+        function buildTurnQueue() {
+            gameState.turnQueue = [];
+            gameState.players.forEach((p, pIdx) => {
+                p.hands.forEach((h, hIdx) => {
+                    if (h.status === 'WAITING' || h.status === 'PLAYING') {
+                        // If not blackjack or bust
+                        if(h.status !== 'BLACKJACK' && h.status !== 'BUST') {
+                            h.status = 'PLAYING';
+                            gameState.turnQueue.push({ playerId: p.id, handIndex: hIdx });
+                        }
+                    }
+                });
+            });
+            checkGameEnd();
         }
 
-        function handleHostAction(pid, action) {
-            const idx = gameState.players.findIndex(p => p.id === pid);
-            const p = gameState.players[idx];
-            if (gameState.currentPlayerIndex !== idx || !['PLAYING','HIT'].includes(p.status)) return;
+        function handleHostAction(pid, action, handIndex) {
+            const turn = gameState.turnQueue[0];
+            if (!turn || turn.playerId !== pid || turn.handIndex !== handIndex) return;
+
+            const p = gameState.players.find(pl => pl.id === pid);
+            const hand = p.hands[handIndex];
 
             if (action === 'hit') {
-                p.hand.push(gameState.deck.pop());
-                p.score = getScore(p.hand);
-                p.status = 'HIT';
-                if (p.score > 21) { p.status = 'BUST'; gameState.currentPlayerIndex++; advanceTurn(); }
-            } else {
-                p.status = 'STAND';
-                gameState.currentPlayerIndex++;
-                advanceTurn();
+                hand.cards.push(gameState.deck.pop());
+                hand.score = getScore(hand.cards);
+                if (hand.score > 21) {
+                    hand.status = 'BUST';
+                    nextTurn();
+                } else if (hand.score === 21) {
+                    hand.status = 'STAND'; // Auto stand on 21
+                    nextTurn();
+                }
+            } 
+            else if (action === 'stand') {
+                hand.status = 'STAND';
+                nextTurn();
             }
+            else if (action === 'double') {
+                // Check funds (Simulated check for Host acting on behalf, real check done client side)
+                hand.bet *= 2;
+                p.totalBet += hand.bet; // Roughly track
+                hand.cards.push(gameState.deck.pop());
+                hand.score = getScore(hand.cards);
+                hand.status = (hand.score > 21) ? 'BUST' : 'STAND';
+                nextTurn();
+            }
+            else if (action === 'split') {
+                // 1. Move 2nd card to new hand
+                const cardToMove = hand.cards.pop();
+                // 2. Create new hand
+                const newHand = { 
+                    cards: [cardToMove], 
+                    bet: hand.bet, 
+                    status: 'PLAYING', 
+                    result: '' 
+                };
+                // Add original card back to first hand (replaced the 2nd one? No, split means 2 hands)
+                // Actually logic: Hand 1 has [A, 10]. Hand 2 gets 10. Hand 1 keeps A.
+                // We need to deal 1 card to Hand 1 and 1 card to Hand 2 immediately usually.
+                // Let's do:
+                // Hand 1: [Card1] -> deal Card3
+                // Hand 2: [Card2] -> deal Card4
+                
+                hand.cards.push(gameState.deck.pop()); // Deal to hand 1
+                newHand.cards.push(gameState.deck.pop()); // Deal to hand 2
+                
+                p.hands.push(newHand);
+                p.totalBet += hand.bet;
+
+                // Update Turn Queue: Insert the new hand immediately after current hand
+                // But first, let's check for Blackjack in new hands
+                calculateScores();
+                
+                // Recalculate queue completely to be safe
+                buildTurnQueue(); 
+                // Note: We need to find where the player is in queue and ensure they play both hands
+                // The simple buildTurnQueue handles this because it iterates all hands.
+            }
+
             calculateScores();
             broadcastState();
         }
 
+        function nextTurn() {
+            gameState.turnQueue.shift();
+            checkGameEnd();
+        }
+
+        function checkGameEnd() {
+            if (gameState.turnQueue.length === 0) {
+                dealerPlay();
+            }
+        }
+
         function dealerPlay() {
+            // Dealer hits on soft 17? Let's stick to simple < 17
             while (gameState.dealerScore < 17) {
                 gameState.dealerHand.push(gameState.deck.pop());
                 gameState.dealerScore = getScore(gameState.dealerHand);
@@ -606,43 +740,49 @@
         function resolveGame() {
             gameState.phase = 'RESULT';
             gameState.players.forEach(p => {
-                if (p.status === 'BUST') p.result = 'LOSS';
-                else if (p.status === 'BLACKJACK') p.result = (gameState.dealerScore === 21) ? 'PUSH' : 'WIN';
-                else {
-                    if (gameState.dealerScore > 21) p.result = 'WIN';
-                    else if (p.score > gameState.dealerScore) p.result = 'WIN';
-                    else if (p.score === gameState.dealerScore) p.result = 'PUSH';
-                    else p.result = 'LOSS';
-                }
+                p.hands.forEach(h => {
+                    if (h.status === 'BUST') h.result = 'LOSS';
+                    else if (h.status === 'BLACKJACK') h.result = (gameState.dealerScore === 21) ? 'PUSH' : 'WIN 3:2';
+                    else if (gameState.dealerScore > 21) h.result = 'WIN';
+                    else if (h.score > gameState.dealerScore) h.result = 'WIN';
+                    else if (h.score === gameState.dealerScore) h.result = 'PUSH';
+                    else h.result = 'LOSS';
+                });
             });
             broadcastState();
-            renderGame();
             
-            // Auto restart logic
-            setTimeout(() => { if(gameState.isHost) startBettingPhase(); }, 6000);
+            // Auto restart
+            setTimeout(() => { if(gameState.isHost) startBettingPhase(); }, 7000);
         }
 
         /* --- Client Inputs --- */
-        function setBet(amt) {
-            if (amt > myBankroll) return showToast("Insufficient Funds");
-            currentBet = amt;
-            document.getElementById('current-bet-display').textContent = amt;
+        function adjustBet(amt) {
+            if (amt === 'clear') {
+                currentBetInput = 0;
+            } else {
+                if (currentBetInput + amt > myBankroll) return showToast("Insufficient Funds");
+                currentBetInput += amt;
+            }
+            document.getElementById('current-bet-display').textContent = currentBetInput;
         }
 
         function submitBet() {
-            if (currentBet === 0) return showToast("Place a bet");
-            if (currentBet > myBankroll) return showToast("Insufficient Funds");
+            if (currentBetInput === 0) return showToast("Place a bet");
+            if (currentBetInput > myBankroll) return showToast("Insufficient Funds");
 
-            myBankroll -= currentBet;
+            myBankroll -= currentBetInput;
             saveBankroll();
-            publishMessage({ type: 'BET', id: myId, amount: currentBet });
-            document.getElementById('betting-controls').style.display = 'none';
-            document.getElementById('waiting-controls').style.display = 'flex';
-            document.getElementById('waiting-text').textContent = "Waiting for other bets...";
+            publishMessage({ type: 'BET', id: myId, amount: currentBetInput });
+            currentBetInput = 0;
+            document.getElementById('current-bet-display').textContent = '0';
         }
 
         function sendAction(act) {
-            publishMessage({ type: 'ACTION', id: myId, action: act });
+            // Find my current hand index
+            const turn = gameState.turnQueue[0];
+            if(turn && turn.playerId === myId) {
+                publishMessage({ type: 'ACTION', id: myId, action: act, handIndex: turn.handIndex });
+            }
         }
 
         /* --- Rendering --- */
@@ -651,7 +791,7 @@
             const dCont = document.getElementById('dealer-hand');
             dCont.innerHTML = '';
             gameState.dealerHand.forEach((c, i) => {
-                const hidden = (gameState.phase === 'PLAYING' || gameState.phase === 'BETTING') && i === 1;
+                const hidden = (gameState.phase === 'PLAYING') && i === 1;
                 dCont.appendChild(createCardEl(c, hidden));
             });
             document.getElementById('dealer-score').innerText = (gameState.phase === 'PLAYING') ? 'Dealer: ?' : 'Dealer: ' + (gameState.dealerScore || 0);
@@ -659,41 +799,70 @@
             // Players
             const pCont = document.getElementById('players-container');
             pCont.innerHTML = '';
-            gameState.players.forEach((p, idx) => {
+            
+            gameState.players.forEach((p) => {
                 const isMe = p.id === myId;
-                const isTurn = gameState.phase === 'PLAYING' && gameState.currentPlayerIndex === idx && isMe;
+                const isTurn = gameState.turnQueue.length > 0 && gameState.turnQueue[0].playerId === p.id;
+                const activeHandIdx = isTurn ? gameState.turnQueue[0].handIndex : -1;
 
                 const div = document.createElement('div');
-                div.className = 'player-info';
-                if (isTurn) div.classList.add('active-turn');
+                div.className = `player-info ${isTurn ? 'active-turn' : ''}`;
 
-                // Handle Win/Loss Currency logic locally
-                if (isMe && gameState.phase === 'RESULT' && p.result === 'WIN') {
-                    myBankroll += (p.bet * 2);
-                    saveBankroll();
-                    p.result = 'PAID';
-                }
-                if (isMe && gameState.phase === 'RESULT' && p.result === 'PUSH') {
-                    myBankroll += p.bet;
-                    saveBankroll();
-                    p.result = 'PAID';
+                // Payout Logic (Client Side Update)
+                if (isMe && gameState.phase === 'RESULT') {
+                    p.hands.forEach(h => {
+                        if (h.result === 'PAID') return; // Already processed
+                        let payout = 0;
+                        if (h.result.includes('WIN')) {
+                            payout = (h.result === 'WIN 3:2') ? h.bet * 2.5 : h.bet * 2;
+                        } else if (h.result === 'PUSH') {
+                            payout = h.bet;
+                        }
+                        if (payout > 0) {
+                            myBankroll += payout;
+                            h.result = 'PAID'; // Mark as paid locally
+                            saveBankroll();
+                        }
+                    });
                 }
 
-                let txt = p.status;
-                if (gameState.phase === 'RESULT') {
-                    if (p.result === 'WIN') txt = `WINNER (+$${p.bet})`;
-                    else if (p.result === 'LOSS') txt = 'LOST';
-                    else txt = 'PUSH';
+                let statusText = '';
+                if (gameState.phase === 'BETTING') statusText = 'Betting';
+                else if (gameState.phase === 'PLAYING') {
+                    if (isTurn) statusText = "YOUR TURN";
+                    else if (p.hands.some(h => h.status === 'BUST')) statusText = 'Bust';
+                    else statusText = 'Waiting...';
                 }
+                else if (gameState.phase === 'RESULT') {
+                    const results = p.hands.map(h => h.result).filter(r => r !== 'PAID');
+                    statusText = results.length > 0 ? results.join(', ') : 'Paid';
+                }
+
+                // Generate Hand HTML
+                let handsHtml = '';
+                p.hands.forEach((h, hIdx) => {
+                    const cardsHtml = h.cards.map(c => createCardEl(c).outerHTML).join('');
+                    const scoreText = h.score ? h.score : '';
+                    const badge = hIdx === activeHandIdx ? '<span style="color:var(--gold); font-size:0.8rem;">▼ Play</span>' : '';
+                    
+                    handsHtml += `
+                        <div style="display:flex; flex-direction:column; align-items:center; position:relative;">
+                            <div style="font-size:0.8rem; color:#aaa; margin-bottom:5px;">Hand ${hIdx+1} ($${h.bet}) ${badge}</div>
+                            <div class="hand-container" style="transform: scale(0.9);">
+                                ${cardsHtml}
+                            </div>
+                            <div style="margin-top:5px; font-weight:bold; color: ${h.status==='BUST'?'red':'var(--gold)'}">
+                                ${scoreText} ${h.status==='BUST'?'(BUST)':''}
+                            </div>
+                        </div>
+                    `;
+                });
 
                 div.innerHTML = `
-                    <div style="width:100%">
-                        <div class="name">${p.name} ${isMe?'(You)':''}</div>
-                        <div class="bet">Bet: $${p.bet}</div>
-                        <div class="status" style="color:${txt.includes('WIN')?'#4caf50':(txt.includes('LOST')?'#f44336':'#aaa')}">${txt}</div>
-                    </div>
-                    <div class="hand-container" style="height: 50px; margin-top:5px;">
-                        ${p.hand.map(c => createCardEl(c).outerHTML).join('')}
+                    <div class="name">${p.name} ${isMe?'(You)':''}</div>
+                    <div class="status-text">${statusText}</div>
+                    <div class="split-wrapper" style="margin-top:10px;">
+                        ${handsHtml}
                     </div>
                 `;
                 pCont.appendChild(div);
@@ -707,41 +876,69 @@
             const actC = document.getElementById('action-controls');
             const waitC = document.getElementById('waiting-controls');
             const waitTxt = document.getElementById('waiting-text');
+            const btnHit = document.getElementById('btn-hit');
+            const btnDouble = document.getElementById('btn-double');
+            const btnSplit = document.getElementById('btn-split');
 
+            // Reset
             betC.style.display = 'none'; actC.style.display = 'none'; waitC.style.display = 'none';
 
             if (gameState.phase === 'BETTING') {
                 const me = gameState.players.find(p => p.id === myId);
-                if (me && me.status === 'BETTING') betC.style.display = 'flex';
+                if (me && me.hands.length === 0) betC.style.display = 'flex';
                 else { waitC.style.display = 'flex'; waitTxt.textContent = "Waiting for bets..."; }
             } 
             else if (gameState.phase === 'PLAYING') {
                 const me = gameState.players.find(p => p.id === myId);
-                const idx = gameState.players.findIndex(p => p.id === myId);
-                
-                if (['BUST','STAND','BLACKJACK'].includes(me.status)) {
-                    waitC.style.display = 'flex'; waitTxt.textContent = "You finished. Waiting...";
-                } else if (idx === gameState.currentPlayerIndex) {
-                    actC.style.display = 'flex'; showToast("Your Turn!");
+                const turn = gameState.turnQueue[0];
+                const isMyTurn = turn && turn.playerId === myId;
+
+                if (isMyTurn) {
+                    actC.style.display = 'flex';
+                    const myHand = me.hands[turn.handIndex];
+                    
+                    // Double Logic: Only 2 cards
+                    btnDouble.disabled = (myHand.cards.length !== 2 || myBankroll < myHand.bet);
+                    
+                    // Split Logic: 2 cards, same value, enough money
+                    const canSplit = myHand.cards.length === 2 && 
+                                     myHand.cards[0].value === myHand.cards[1].value && 
+                                     myBankroll >= myHand.bet;
+                    btnSplit.disabled = !canSplit;
+                    
+                    showToast("Your Turn!");
                 } else {
                     waitC.style.display = 'flex'; 
-                    const curr = gameState.players[gameState.currentPlayerIndex];
-                    waitTxt.textContent = curr ? `${curr.name}'s Turn...` : "Waiting...";
+                    const currP = gameState.players.find(p => p.id === turn?.playerId);
+                    waitTxt.textContent = currP ? `${currP.name}'s Turn...` : "Dealer thinking...";
                 }
             }
             else if (gameState.phase === 'RESULT') {
-                waitC.style.display = 'flex'; waitTxt.textContent = "Round Over. Restarting...";
+                waitC.style.display = 'flex'; waitTxt.textContent = "Round Over. Next round soon...";
             }
         }
 
         function createCardEl(c, hidden=false) {
             const el = document.createElement('div');
-            el.className = `card ${hidden?'hidden':''} ${['♥','♦'].includes(c.suit)?'red':''}`;
+            el.className = `card ${hidden?'hidden':''} ${['♥','♦'].includes(c.suit)?'red':''} animate`;
+            
             if(!hidden) {
-                el.innerHTML = `<div>${c.value}</div><div>${c.suit}</div>`;
-                el.style.flexDirection = 'column';
+                const isRed = ['♥','♦'].includes(c.suit);
+                el.innerHTML = `
+                    <div class="card-corner top-left"><div>${c.value}</div><div>${c.suit}</div></div>
+                    <div class="card-center ${isRed ? 'red' : ''}">${c.suit}</div>
+                    <div class="card-corner bottom-right"><div>${c.value}</div><div>${c.suit}</div></div>
+                `;
             }
             return el;
+        }
+
+        function resetBankroll() {
+            if(confirm("Reset money to $1000?")) {
+                myBankroll = 1000;
+                saveBankroll();
+                showToast("Bankroll reset!");
+            }
         }
 
     </script>
