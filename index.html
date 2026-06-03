@@ -3,119 +3,1189 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Arcade Lounge Demo</title>
+  <title>Arcade Lounge</title>
   <style>
-    :root{--bg:#08111f;--panel:#0f1b2f;--panel2:#13233d;--gold:#f7c948;--gold2:#d8a73a;--text:#eaf1ff;--muted:#9fb0d0;--good:#42d392;--bad:#ff6b6b;--accent:#7c5cff;--line:rgba(255,255,255,.08)}
-    *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(circle at top,#122447 0,#08111f 45%,#040910 100%);color:var(--text)}
-    .app{min-height:100vh;display:grid;grid-template-rows:auto 1fr} .topbar{display:flex;justify-content:space-between;align-items:center;padding:18px 24px;border-bottom:1px solid var(--line);backdrop-filter:blur(10px);background:rgba(4,9,16,.45);position:sticky;top:0;z-index:5}
-    .brand{display:flex;gap:12px;align-items:center}.logo{width:44px;height:44px;border-radius:14px;background:linear-gradient(145deg,var(--gold),#fff0b0);box-shadow:0 0 30px rgba(247,201,72,.25)}
-    .brand h1{font-size:18px;margin:0}.brand p{margin:2px 0 0;color:var(--muted);font-size:12px}
-    .pillrow{display:flex;gap:10px;flex-wrap:wrap}.pill{padding:10px 14px;border:1px solid var(--line);background:rgba(255,255,255,.04);border-radius:999px;font-size:13px;color:var(--text)}
+    :root{
+      --bg:#07111f;
+      --panel:#101b2f;
+      --panel2:#142442;
+      --panel3:#0c1628;
+      --line:rgba(255,255,255,.08);
+      --text:#ecf2ff;
+      --muted:#9db0d0;
+      --gold:#f7c948;
+      --gold2:#d8a73a;
+      --accent:#7c5cff;
+      --good:#42d392;
+      --bad:#ff6b6b;
+      --warn:#ffb84d;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:
+        radial-gradient(circle at top,#152a52 0,#08111f 40%,#03070d 100%);
+      color:var(--text);
+    }
+    button,input,select{font:inherit}
+    .app{min-height:100vh;display:grid;grid-template-rows:auto 1fr}
+    .topbar{
+      display:flex;justify-content:space-between;align-items:center;gap:16px;
+      padding:18px 22px;border-bottom:1px solid var(--line);
+      background:rgba(5,10,18,.55);backdrop-filter:blur(12px);
+      position:sticky;top:0;z-index:5
+    }
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{
+      width:44px;height:44px;border-radius:14px;
+      background:linear-gradient(145deg,var(--gold),#fff0b0);
+      box-shadow:0 0 24px rgba(247,201,72,.28)
+    }
+    .brand h1{margin:0;font-size:18px}
+    .brand p{margin:2px 0 0;color:var(--muted);font-size:12px}
+    .pillrow{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+    .pill{
+      padding:10px 14px;border-radius:999px;background:rgba(255,255,255,.04);
+      border:1px solid var(--line);font-size:13px
+    }
     .pill strong{color:var(--gold)}
-    .layout{display:grid;grid-template-columns:260px 1fr 320px;gap:18px;padding:18px;max-width:1600px;width:100%;margin:0 auto}
-    .panel{background:linear-gradient(180deg,rgba(19,35,61,.96),rgba(10,18,32,.96));border:1px solid var(--line);border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
-    .sidebar,.rightbar{padding:18px} .sidebar h2,.rightbar h2{margin:0 0 12px;font-size:15px;color:#fff}
-    .menu{display:grid;gap:10px}.menu button,.action{width:100%;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--text);padding:14px 14px;border-radius:16px;cursor:pointer;text-align:left;transition:.2s}
-    .menu button.active,.menu button:hover,.action:hover{transform:translateY(-1px);border-color:rgba(247,201,72,.35);background:rgba(247,201,72,.08)}
-    .main{padding:18px} .hero{display:flex;justify-content:space-between;gap:18px;align-items:end;padding:22px;border-radius:22px;background:linear-gradient(135deg,rgba(124,92,255,.15),rgba(247,201,72,.1));border:1px solid rgba(255,255,255,.08)}
-    .hero h2{margin:0 0 8px;font-size:30px} .hero p{margin:0;color:var(--muted);max-width:700px;line-height:1.5}
-    .balance{min-width:220px;padding:16px 18px;border-radius:18px;background:rgba(4,9,16,.4);border:1px solid var(--line)} .balance .label{color:var(--muted);font-size:12px}.balance .value{font-size:28px;font-weight:800;color:var(--gold);margin-top:4px}
-    .content{display:grid;grid-template-columns:1.2fr .8fr;gap:18px;margin-top:18px}.card{padding:18px;border-radius:22px;background:rgba(255,255,255,.03);border:1px solid var(--line)}
-    .card h3{margin:0 0 12px} .muted{color:var(--muted)} .gamebox{display:grid;gap:14px} .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    select,input,button{font:inherit} select,input{background:#08111f;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:12px 12px} input{width:120px}
-    .dealers,.hands{display:grid;gap:10px}.hand{display:flex;gap:10px;flex-wrap:wrap;min-height:82px;padding:12px;border-radius:16px;background:rgba(255,255,255,.03);border:1px dashed rgba(255,255,255,.08)}
-    .cardchip{width:56px;height:76px;border-radius:12px;background:linear-gradient(180deg,#f8fbff,#dfe7f5);color:#121826;display:flex;flex-direction:column;justify-content:space-between;padding:8px;font-weight:800;box-shadow:0 8px 20px rgba(0,0,0,.22)}
-    .cardchip.red{color:#c83e4d}.cardchip .s{font-size:18px;align-self:flex-end} .footer-note{margin-top:12px;color:var(--muted);font-size:12px;line-height:1.5}
-    .statgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px}.stat{padding:14px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid var(--line)}.stat .k{color:var(--muted);font-size:12px}.stat .v{font-size:22px;font-weight:800;margin-top:4px}
-    .log{max-height:340px;overflow:auto;display:grid;gap:10px}.entry{padding:12px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid var(--line);font-size:13px;color:#d8e4ff}
-    .good{color:var(--good)} .bad{color:var(--bad)} .chip{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(247,201,72,.12);border:1px solid rgba(247,201,72,.25);color:#ffe9a5;font-size:12px}
-    @media (max-width: 1180px){.layout{grid-template-columns:1fr}.content{grid-template-columns:1fr}.sidebar,.rightbar{order:2}.main{order:1}}
+    .layout{
+      display:grid;grid-template-columns:270px 1fr 330px;gap:18px;
+      padding:18px;max-width:1700px;margin:0 auto;width:100%
+    }
+    .panel{
+      background:linear-gradient(180deg,rgba(16,27,47,.97),rgba(8,14,25,.97));
+      border:1px solid var(--line);border-radius:24px;
+      box-shadow:0 18px 50px rgba(0,0,0,.35)
+    }
+    .sidebar,.rightbar{padding:18px}
+    .sidebar h2,.rightbar h2{margin:0 0 12px;font-size:15px}
+    .menu{display:grid;gap:10px}
+    .menu button,.action{
+      width:100%;border:1px solid var(--line);
+      background:rgba(255,255,255,.04);color:var(--text);
+      padding:14px 14px;border-radius:16px;cursor:pointer;text-align:left;
+      transition:.18s ease
+    }
+    .menu button:hover,.menu button.active,.action:hover{
+      border-color:rgba(247,201,72,.35);
+      background:rgba(247,201,72,.08);
+      transform:translateY(-1px)
+    }
+    .section-note{margin-top:14px;color:var(--muted);font-size:12px;line-height:1.5}
+    .main{padding:18px}
+    .hero{
+      display:flex;justify-content:space-between;gap:18px;align-items:end;
+      padding:22px;border-radius:22px;
+      background:linear-gradient(135deg,rgba(124,92,255,.16),rgba(247,201,72,.10));
+      border:1px solid rgba(255,255,255,.08)
+    }
+    .hero h2{margin:0 0 8px;font-size:30px}
+    .hero p{margin:0;color:var(--muted);max-width:760px;line-height:1.5}
+    .balance{
+      min-width:230px;padding:16px 18px;border-radius:18px;
+      background:rgba(4,9,16,.45);border:1px solid var(--line)
+    }
+    .balance .label{color:var(--muted);font-size:12px}
+    .balance .value{font-size:28px;font-weight:800;color:var(--gold);margin-top:4px}
+    .content{display:grid;grid-template-columns:1.25fr .75fr;gap:18px;margin-top:18px}
+    .card{
+      padding:18px;border-radius:22px;background:rgba(255,255,255,.03);
+      border:1px solid var(--line)
+    }
+    .card h3{margin:0 0 12px}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .muted{color:var(--muted)}
+    .chip{
+      display:inline-block;padding:6px 10px;border-radius:999px;
+      background:rgba(247,201,72,.12);border:1px solid rgba(247,201,72,.22);
+      color:#ffe9a5;font-size:12px
+    }
+    .gamebox{display:grid;gap:14px}
+    input,select{
+      background:#08111f;color:var(--text);border:1px solid var(--line);
+      border-radius:12px;padding:12px 12px
+    }
+    input{width:130px}
+    .handwrap{display:grid;gap:10px}
+    .hand{
+      display:flex;gap:10px;flex-wrap:wrap;min-height:90px;padding:12px;
+      border-radius:16px;background:rgba(255,255,255,.03);
+      border:1px dashed rgba(255,255,255,.08)
+    }
+    .cardchip{
+      width:58px;height:80px;border-radius:12px;
+      background:linear-gradient(180deg,#fbfdff,#dfe7f5);
+      color:#101827;display:flex;flex-direction:column;
+      justify-content:space-between;padding:8px;font-weight:800;
+      box-shadow:0 10px 22px rgba(0,0,0,.26)
+    }
+    .cardchip.red{color:#c73f4b}
+    .cardchip .s{font-size:18px;align-self:flex-end}
+    .statgrid{
+      display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px
+    }
+    .stat{
+      padding:14px;border-radius:16px;background:rgba(255,255,255,.03);
+      border:1px solid var(--line)
+    }
+    .stat .k{color:var(--muted);font-size:12px}
+    .stat .v{font-size:22px;font-weight:800;margin-top:4px}
+    .good{color:var(--good)} .bad{color:var(--bad)} .warn{color:var(--warn)}
+    .log{
+      max-height:430px;overflow:auto;display:grid;gap:10px
+    }
+    .entry{
+      padding:12px;border-radius:14px;background:rgba(255,255,255,.03);
+      border:1px solid var(--line);font-size:13px;color:#d7e3ff
+    }
+
+    /* Roulette table */
+    .roulette{
+      display:grid;grid-template-columns:1fr;gap:12px
+    }
+    .wheelinfo{
+      display:flex;gap:10px;flex-wrap:wrap;align-items:center
+    }
+    .roulette-board{
+      display:grid;
+      grid-template-columns:52px repeat(12,1fr) 70px;
+      gap:4px;
+      padding:10px;
+      border-radius:18px;
+      background:rgba(0,0,0,.28);
+      border:1px solid rgba(255,255,255,.08)
+    }
+    .roulette .cell,.roulette .zero,.roulette .outside,.roulette .column,.roulette .dozen,.roulette .betbox{
+      min-height:48px;border-radius:10px;border:1px solid rgba(255,255,255,.08);
+      display:flex;align-items:center;justify-content:center;
+      cursor:pointer;user-select:none;transition:.14s ease;
+      font-size:13px;font-weight:700
+    }
+    .roulette .cell:hover,.roulette .zero:hover,.roulette .outside:hover,.roulette .column:hover,.roulette .dozen:hover,.roulette .betbox:hover{
+      transform:translateY(-1px);filter:brightness(1.08)
+    }
+    .roulette .zero{grid-column:1;grid-row:1/4;background:#1f7a3f}
+    .roulette .cell.red{background:#b11f2b}
+    .roulette .cell.black{background:#1f2430}
+    .roulette .column{background:#24304c}
+    .roulette .outside.redbet{background:#b11f2b}
+    .roulette .outside.blackbet{background:#1f2430}
+    .roulette .outside.greenbet{background:#1f7a3f}
+    .roulette .outside{background:#26324d}
+    .roulette .dozen{background:#374867}
+    .roulette .rowbet{background:#2f3d58}
+    .roulette .footerline{
+      display:grid;grid-template-columns:repeat(3,1fr);gap:4px
+    }
+    .roulette .chipstack{
+      display:flex;gap:8px;flex-wrap:wrap
+    }
+    .bettag{
+      padding:8px 10px;border-radius:999px;background:rgba(247,201,72,.12);
+      border:1px solid rgba(247,201,72,.22);font-size:12px
+    }
+
+    @media (max-width: 1220px){
+      .layout{grid-template-columns:1fr}
+      .content{grid-template-columns:1fr}
+      .sidebar,.rightbar{order:2}
+      .main{order:1}
+      .pillrow{justify-content:flex-start}
+    }
   </style>
 </head>
 <body>
-  <div class="app">
-    <div class="topbar">
-      <div class="brand"><div class="logo"></div><div><h1>Arcade Lounge</h1><p>Fantasy coins, card tables, and bot opponents</p></div></div>
-      <div class="pillrow"><div class="pill">Wallet: <strong id="walletTop">10,000</strong> Coins</div><div class="pill">Mode: <strong id="modeLabel">Blackjack</strong></div><div class="pill">Status: <strong id="statusLabel">Ready</strong></div></div>
+<div class="app">
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo"></div>
+      <div>
+        <h1>Arcade Lounge</h1>
+        <p>Fantasy coins, card tables, and player choice</p>
+      </div>
     </div>
-    <div class="layout">
-      <aside class="panel sidebar">
-        <h2>Game Lobby</h2>
-        <div class="menu">
-          <button class="active" data-mode="blackjack">Blackjack</button>
-          <button data-mode="poker">Poker</button>
-          <button data-mode="baccarat">Baccarat</button>
-          <button data-mode="roulette">Roulette</button>
-        </div>
-        <div class="footer-note">This is a fictional demo with no real-money wagering.</div>
-      </aside>
-
-      <main class="panel main">
-        <div class="hero">
-          <div>
-            <h2 id="title">Blackjack Table</h2>
-            <p id="subtitle">Play against a bot dealer with fake coins. Try to beat 21 without going over.</p>
-          </div>
-          <div class="balance"><div class="label">Current Balance</div><div class="value" id="walletMain">10,000</div></div>
-        </div>
-
-        <div class="content">
-          <section class="card">
-            <h3>Table</h3>
-            <div class="gamebox" id="gameArea"></div>
-          </section>
-          <section class="card">
-            <h3>Stats</h3>
-            <div class="statgrid">
-              <div class="stat"><div class="k">Wins</div><div class="v good" id="wins">0</div></div>
-              <div class="stat"><div class="k">Losses</div><div class="v bad" id="losses">0</div></div>
-              <div class="stat"><div class="k">Pushes</div><div class="v" id="pushes">0</div></div>
-              <div class="stat"><div class="k">Streak</div><div class="v" id="streak">0</div></div>
-            </div>
-            <div class="footer-note">Bots use simple rules, so you can focus on the UI and game flow.</div>
-          </section>
-        </div>
-      </main>
-
-      <aside class="panel rightbar">
-        <h2>Activity</h2>
-        <div class="row" style="margin-bottom:10px"><span class="chip">Fake Currency</span><span class="chip">Bot Opponents</span></div>
-        <div class="log" id="log"></div>
-      </aside>
+    <div class="pillrow">
+      <div class="pill">Wallet: <strong id="walletTop">10,000</strong> Coins</div>
+      <div class="pill">Mode: <strong id="modeLabel">Blackjack</strong></div>
+      <div class="pill">Status: <strong id="statusLabel">Ready</strong></div>
     </div>
   </div>
 
+  <div class="layout">
+    <aside class="panel sidebar">
+      <h2>Game Lobby</h2>
+      <div class="menu" id="menu"></div>
+      <div class="section-note">
+        This is a fictional demo only. The balance, wins, and settings are saved locally in your browser.
+      </div>
+    </aside>
+
+    <main class="panel main">
+      <div class="hero">
+        <div>
+          <h2 id="title">Blackjack Table</h2>
+          <p id="subtitle">Choose your move. Every game gives you real options instead of forcing a fixed result.</p>
+        </div>
+        <div class="balance">
+          <div class="label">Current Balance</div>
+          <div class="value" id="walletMain">10,000</div>
+        </div>
+      </div>
+
+      <div class="content">
+        <section class="card">
+          <h3>Table</h3>
+          <div class="gamebox" id="gameArea"></div>
+        </section>
+
+        <section class="card">
+          <h3>Stats</h3>
+          <div class="statgrid">
+            <div class="stat"><div class="k">Wins</div><div class="v good" id="wins">0</div></div>
+            <div class="stat"><div class="k">Losses</div><div class="v bad" id="losses">0</div></div>
+            <div class="stat"><div class="k">Pushes</div><div class="v" id="pushes">0</div></div>
+            <div class="stat"><div class="k">Streak</div><div class="v" id="streak">0</div></div>
+          </div>
+          <div class="row" style="margin-top:14px">
+            <button class="action" id="saveBtn">Save Now</button>
+            <button class="action" id="resetBtn">Reset Save</button>
+          </div>
+          <div class="section-note">Local save uses browser storage and persists until you clear it.</div>
+        </section>
+      </div>
+    </main>
+
+    <aside class="panel rightbar">
+      <h2>Activity</h2>
+      <div class="row" style="margin-bottom:10px">
+        <span class="chip">Fake Currency</span>
+        <span class="chip">Bot Opponents</span>
+        <span class="chip">Player Choice</span>
+      </div>
+      <div class="log" id="log"></div>
+    </aside>
+  </div>
+</div>
+
 <script>
-const state = {wallet:10000,wins:0,losses:0,pushes:0,streak:0,mode:'blackjack',bet:100,player:[],dealer:[],roundActive:false,deck:[]}
-const suits = ['♠','♥','♦','♣']; const names = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+const STORAGE_KEY = "arcade_lounge_save_v1";
+
+const state = {
+  mode: "blackjack",
+  wallet: 10000,
+  wins: 0,
+  losses: 0,
+  pushes: 0,
+  streak: 0,
+  status: "Ready",
+  bet: 100,
+  deck: [],
+  playerHands: [[]],
+  dealerHand: [],
+  activeHand: 0,
+  blackjackRound: false,
+  poker: { pot: 0, playerBet: 0, botBet: 0, playerCards: [], botCards: [], phase: 0, folded: false },
+  rouletteBets: [],
+  rouletteLast: "—",
+  war: { player: [], bot: [], pile: [], round: false },
+  gofish: { player: [], bot: [], asks: 0, target: null, drawn: false },
+  crazy: { player: [], bot: [], top: null, suit: "♠", deck: [] },
+  rummy: { player: [], bot: [], discards: [], deck: [], drawPhase: false },
+  hearts: { player: [], bot: [], trick: [], lead: "player", deck: [] }
+};
+
+const suits = ["♠","♥","♦","♣"];
+const names = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
 const el = id => document.getElementById(id);
-const fmt = n => n.toLocaleString();
-function log(msg, cls=''){ const div=document.createElement('div'); div.className='entry '+cls; div.textContent=msg; el('log').prepend(div); }
-function update(){ el('walletTop').textContent=fmt(state.wallet); el('walletMain').textContent=fmt(state.wallet); el('wins').textContent=state.wins; el('losses').textContent=state.losses; el('pushes').textContent=state.pushes; el('streak').textContent=state.streak; el('modeLabel').textContent=state.mode[0].toUpperCase()+state.mode.slice(1); }
-function buildDeck(){ state.deck=[]; for(const s of suits) for(let i=0;i<13;i++) state.deck.push({name:names[i],suit:s,val:i===0?11:Math.min(i+1,10)}); state.deck.sort(()=>Math.random()-.5); }
-function draw(){ return state.deck.pop(); }
-function handValue(hand){ let sum=0, aces=0; hand.forEach(c=>{sum+=c.val;if(c.name==='A') aces++}); while(sum>21 && aces){sum-=10; aces--} return sum; }
-function chip(card){ const d=document.createElement('div'); d.className='cardchip '+(['♥','♦'].includes(card.suit)?'red':''); d.innerHTML=`<div>${card.name}</div><div class='s'>${card.suit}</div>`; return d; }
-function renderBlackjack(){ el('gameArea').innerHTML = `
-  <div class='row'><label>Bet</label><input id='betInput' type='number' min='10' step='10' value='${state.bet}' /><button class='action' id='dealBtn'>Deal</button><button class='action' id='hitBtn' ${state.roundActive?'':'disabled'}>Hit</button><button class='action' id='standBtn' ${state.roundActive?'':'disabled'}>Stand</button></div>
-  <div class='dealers'><div><strong>Dealer</strong> <span class='muted' id='dealerScore'></span></div><div class='hand' id='dealerHand'></div></div>
-  <div class='hands'><div><strong>You</strong> <span class='muted' id='playerScore'></span></div><div class='hand' id='playerHand'></div></div>`;
-  el('dealBtn').onclick = deal; el('hitBtn').onclick = hit; el('standBtn').onclick = stand; el('betInput').onchange = e=> state.bet = Math.max(10, parseInt(e.target.value||'10',10)); renderHands(); }
-function renderPoker(){ el('gameArea').innerHTML = `<div class='row'><button class='action' id='playPoker'>Deal Poker Hand</button><div class='chip'>Bot folds if hand is weak</div></div><div class='dealers'><div><strong>Your Hand</strong></div><div class='hand' id='pokerPlayer'></div></div><div class='dealers'><div><strong>Bot Hand</strong></div><div class='hand' id='pokerBot'></div></div><div class='footer-note'>Poker demo compares a simplified hand score, not full Texas Hold'em.</div>`; el('playPoker').onclick = pokerRound; }
-function renderBaccarat(){ el('gameArea').innerHTML = `<div class='row'><button class='action' id='baccBtn'>Play Round</button><div class='chip'>Bet on Player / Bot / Tie</div><select id='sideSel'><option>Player</option><option>Bot</option><option>Tie</option></select></div><div class='dealers'><div><strong>Player</strong></div><div class='hand' id='baccPlayer'></div></div><div class='dealers'><div><strong>Bot</strong></div><div class='hand' id='baccBot'></div></div><div class='footer-note'>Baccarat uses card totals modulo 10.</div>`; el('baccBtn').onclick = baccaratRound; }
-function renderRoulette(){ el('gameArea').innerHTML = `<div class='row'><button class='action' id='spinBtn'>Spin Wheel</button><input id='rouletteBet' type='number' min='10' step='10' value='100' /><select id='roulettePick'><option>Red</option><option>Black</option><option>Green</option></select></div><div class='card'><h3 style='margin-top:0'>Wheel Result</h3><div id='wheelResult' style='font-size:28px;font-weight:800;color:var(--gold)'>—</div><div class='footer-note'>This is a visual roulette-style mini-game.</div></div>`; el('spinBtn').onclick = rouletteRound; }
-function renderMode(){ el('title').textContent = ({blackjack:'Blackjack Table', poker:'Poker Room', baccarat:'Baccarat Lounge', roulette:'Roulette Wheel'})[state.mode]; el('subtitle').textContent = ({blackjack:'Play against a bot dealer with fake coins. Try to beat 21 without going over.', poker:'Face off with a simple bot and compare hand strength.', baccarat:'Choose a side and see how the bot table resolves the round.', roulette:'Pick a color and spin the wheel for a quick fantasy round.'})[state.mode]; ({blackjack:renderBlackjack,poker:renderPoker,baccarat:renderBaccarat,roulette:renderRoulette})[state.mode](); update(); }
-function deal(){ const bet = Math.max(10, parseInt(el('betInput').value||'10',10)); if(bet>state.wallet){log('Not enough coins for that bet.','bad'); return} state.bet=bet; state.wallet-=bet; state.roundActive=true; buildDeck(); state.player=[draw(),draw()]; state.dealer=[draw(),draw()]; log(`Blackjack started with bet ${fmt(bet)} coins.`); renderHands(); }
-function renderHands(){ if(state.mode!=='blackjack') return; const ph=el('playerHand'), dh=el('dealerHand'); ph.innerHTML=''; dh.innerHTML=''; state.player.forEach(c=>ph.appendChild(chip(c))); state.dealer.forEach((c,i)=>dh.appendChild(chip(c))); el('playerScore').textContent='(' + handValue(state.player) + ')'; el('dealerScore').textContent='(' + (state.roundActive ? '?' : handValue(state.dealer)) + ')'; el('hitBtn').disabled=!state.roundActive; el('standBtn').disabled=!state.roundActive; }
-function settle(result){ state.roundActive=false; if(result==='win'){state.wallet += state.bet*2; state.wins++; state.streak++; log(`You won ${fmt(state.bet)} coins.`, 'good')} else if(result==='push'){state.wallet += state.bet; state.pushes++; log('Push. Your bet was returned.')} else {state.losses++; state.streak=0; log(`You lost ${fmt(state.bet)} coins.`, 'bad')} update(); renderHands(); }
-function hit(){ if(!state.roundActive) return; state.player.push(draw()); renderHands(); const v=handValue(state.player); if(v>21) settle('lose'); }
-function stand(){ if(!state.roundActive) return; while(handValue(state.dealer)<17) state.dealer.push(draw()); const pv=handValue(state.player), dv=handValue(state.dealer); renderHands(); if(dv>21 || pv>dv) settle('win'); else if(pv===dv) settle('push'); else settle('lose'); }
-function pokerScore(hand){ const vals=hand.map(c=>c.val).sort((a,b)=>b-a); return vals[0]*100 + vals[1]*10 + vals[2]; }
-function pokerRound(){ if(state.wallet<50){log('Need more coins to join poker.','bad'); return} const bet=100; state.wallet-=bet; buildDeck(); const player=[draw(),draw(),draw()], bot=[draw(),draw(),draw()]; const ps=pokerScore(player), bs=pokerScore(bot); el('pokerPlayer').innerHTML=''; el('pokerBot').innerHTML=''; player.forEach(c=>el('pokerPlayer').appendChild(chip(c))); bot.forEach(c=>el('pokerBot').appendChild(chip(c))); if(ps>bs){state.wallet+=bet*2; state.wins++; state.streak++; log('Poker win against the bot.','good')} else if(ps===bs){state.wallet+=bet; state.pushes++; log('Poker push.')} else {state.losses++; state.streak=0; log('Poker loss to the bot.','bad')} update(); }
-function baccaratRound(){ if(state.wallet<50){log('Need more coins to join baccarat.','bad'); return} const bet=100; state.wallet-=bet; buildDeck(); const player=[draw(),draw()], bot=[draw(),draw()]; let pt=player.reduce((a,c)=>a+c.val,0)%10, bt=bot.reduce((a,c)=>a+c.val,0)%10; while(pt<6) { const c=draw(); player.push(c); pt=(pt+c.val)%10; } while(bt<6) { const c=draw(); bot.push(c); bt=(bt+c.val)%10; } el('baccPlayer').innerHTML=''; el('baccBot').innerHTML=''; player.forEach(c=>el('baccPlayer').appendChild(chip(c))); bot.forEach(c=>el('baccBot').appendChild(chip(c))); const pick=el('roulettePick')?.value || 'Player'; const winner = pt===bt ? 'Tie' : pt>bt ? 'Player' : 'Bot'; if((pick===winner) || (winner==='Tie' && pick==='Tie')){state.wallet+=bet*2; state.wins++; state.streak++; log(`Baccarat win: ${winner}.`, 'good')} else {state.losses++; state.streak=0; log(`Baccarat loss. Winner was ${winner}.`, 'bad')} update(); }
-function rouletteRound(){ const bet=Math.max(10, parseInt(el('rouletteBet').value||'10',10)); if(bet>state.wallet){log('Not enough coins for roulette.','bad'); return} const pick=el('roulettePick').value; state.wallet-=bet; const n=Math.floor(Math.random()*37); const color = n===0 ? 'Green' : [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36].includes(n) ? 'Red' : 'Black'; el('wheelResult').textContent = `${n} • ${color}`; if(pick===color){state.wallet += bet*2; state.wins++; state.streak++; log(`Roulette win on ${color}.`, 'good')} else {state.losses++; state.streak=0; log(`Roulette loss. Landed on ${color}.`, 'bad')} update(); }
-document.querySelectorAll('.menu button').forEach(btn=>btn.onclick=()=>{document.querySelectorAll('.menu button').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); state.mode=btn.dataset.mode; renderMode();});
-log('Welcome to Arcade Lounge. Pick a game and try your luck against the bots.'); renderMode(); update();
+const fmt = n => Number(n || 0).toLocaleString();
+
+function log(msg, cls="") {
+  const d = document.createElement("div");
+  d.className = "entry " + cls;
+  d.textContent = msg;
+  el("log").prepend(d);
+}
+
+function updateTop() {
+  el("walletTop").textContent = fmt(state.wallet);
+  el("walletMain").textContent = fmt(state.wallet);
+  el("wins").textContent = state.wins;
+  el("losses").textContent = state.losses;
+  el("pushes").textContent = state.pushes;
+  el("streak").textContent = state.streak;
+  el("modeLabel").textContent = state.mode[0].toUpperCase() + state.mode.slice(1);
+  el("statusLabel").textContent = state.status;
+}
+
+function saveGame() {
+  const payload = {
+    wallet: state.wallet,
+    wins: state.wins,
+    losses: state.losses,
+    pushes: state.pushes,
+    streak: state.streak
+  };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+  log("Game saved locally.", "good");
+}
+
+function loadGame() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return;
+  try {
+    const data = JSON.parse(raw);
+    state.wallet = data.wallet ?? state.wallet;
+    state.wins = data.wins ?? 0;
+    state.losses = data.losses ?? 0;
+    state.pushes = data.pushes ?? 0;
+    state.streak = data.streak ?? 0;
+  } catch {}
+}
+
+function resetSave() {
+  localStorage.removeItem(STORAGE_KEY);
+  state.wallet = 10000;
+  state.wins = 0;
+  state.losses = 0;
+  state.pushes = 0;
+  state.streak = 0;
+  log("Save reset.", "warn");
+  updateTop();
+}
+
+function makeDeck() {
+  const deck = [];
+  for (const s of suits) for (let i = 0; i < 13; i++) deck.push({
+    name: names[i],
+    suit: s,
+    val: i === 0 ? 11 : Math.min(i + 1, 10)
+  });
+  deck.sort(() => Math.random() - 0.5);
+  return deck;
+}
+
+function draw(deck) { return deck.pop(); }
+
+function cardEl(card) {
+  const d = document.createElement("div");
+  d.className = "cardchip " + (["♥","♦"].includes(card.suit) ? "red" : "");
+  d.innerHTML = `<div>${card.name}</div><div class="s">${card.suit}</div>`;
+  return d;
+}
+
+function handValue(hand) {
+  let sum = 0, aces = 0;
+  hand.forEach(c => { sum += c.val; if (c.name === "A") aces++; });
+  while (sum > 21 && aces) { sum -= 10; aces--; }
+  return sum;
+}
+
+function renderMenu() {
+  const items = [
+    ["blackjack","Blackjack"],
+    ["poker","Poker"],
+    ["roulette","Roulette"],
+    ["war","War"],
+    ["gofish","Go Fish"],
+    ["crazy","Crazy Eights"],
+    ["rummy","Rummy"],
+    ["hearts","Hearts"],
+    ["spades","Spades"]
+  ];
+  el("menu").innerHTML = items.map(([k,n]) => `<button data-mode="${k}" class="${state.mode===k?"active":""}">${n}</button>`).join("");
+  [...el("menu").querySelectorAll("button")].forEach(b => b.onclick = () => {
+    state.mode = b.dataset.mode;
+    document.querySelectorAll("#menu button").forEach(x => x.classList.remove("active"));
+    b.classList.add("active");
+    renderMode();
+  });
+}
+
+function renderMode() {
+  const map = {
+    blackjack: ["Blackjack Table", "Choose hit, stand, double, split, or surrender. You control the hand."],
+    poker: ["Poker Table", "Choose check, call, raise, or fold through each betting round."],
+    roulette: ["Roulette Table", "Click the table directly to place inside and outside bets."],
+    war: ["War", "Choose whether to continue the round and fight for the pile during ties."],
+    gofish: ["Go Fish", "Ask a rank from the bot or draw a card from the deck."],
+    crazy: ["Crazy Eights", "Play matching cards or an eight, then choose the next suit."],
+    rummy: ["Rummy", "Draw, discard, and choose when to knock."],
+    hearts: ["Hearts", "Pass cards, then choose what to play each trick."],
+    spades: ["Spades", "Bid, play tricks, and try to hit your target."],
+  };
+  el("title").textContent = map[state.mode][0];
+  el("subtitle").textContent = map[state.mode][1];
+  renderGame();
+  updateTop();
+}
+
+function setStatus(text) {
+  state.status = text;
+  updateTop();
+}
+
+function renderGame() {
+  if (state.mode === "blackjack") renderBlackjack();
+  if (state.mode === "poker") renderPoker();
+  if (state.mode === "roulette") renderRoulette();
+  if (state.mode === "war") renderWar();
+  if (state.mode === "gofish") renderGoFish();
+  if (state.mode === "crazy") renderCrazy();
+  if (state.mode === "rummy") renderRummy();
+  if (state.mode === "hearts") renderHearts();
+  if (state.mode === "spades") renderSpades();
+}
+
+function renderBlackjack() {
+  if (!state.blackjackRound) {
+    state.deck = makeDeck();
+    state.playerHands = [[draw(state.deck), draw(state.deck)]];
+    state.dealerHand = [draw(state.deck), draw(state.deck)];
+    state.activeHand = 0;
+    state.blackjackRound = false;
+  }
+  const handCount = state.playerHands.length;
+  const activeHand = state.playerHands[state.activeHand];
+  const canSplit = handCount < 4 && activeHand.length === 2 && activeHand[0].val === activeHand[1].val;
+  const canDouble = activeHand.length === 2;
+  el("gameArea").innerHTML = `
+    <div class="row">
+      <label>Bet</label>
+      <input id="bjBet" type="number" min="10" step="10" value="${state.bet}">
+      <button class="action" id="bjDeal">Deal New Round</button>
+      <button class="action" id="bjHit" ${!state.blackjackRound?"disabled":""}>Hit</button>
+      <button class="action" id="bjStand" ${!state.blackjackRound?"disabled":""}>Stand</button>
+      <button class="action" id="bjDouble" ${!state.blackjackRound||!canDouble?"disabled":""}>Double</button>
+      <button class="action" id="bjSplit" ${!state.blackjackRound||!canSplit?"disabled":""}>Split</button>
+      <button class="action" id="bjSurrender" ${!state.blackjackRound||handCount!==1||activeHand.length!==2?"disabled":""}>Surrender</button>
+    </div>
+    <div class="handwrap">
+      <div><strong>Dealer</strong> <span class="muted">${state.blackjackRound ? "?" : "(" + handValue(state.dealerHand) + ")"}</span></div>
+      <div class="hand" id="bjDealer"></div>
+    </div>
+    <div class="handwrap">
+      <div><strong>You</strong> <span class="muted">Hand ${state.activeHand + 1} of ${state.playerHands.length} ${state.blackjackRound ? "(" + handValue(activeHand) + ")" : ""}</span></div>
+      <div class="hand" id="bjPlayer"></div>
+    </div>
+    <div class="section-note">
+      Normal blackjack choices are available: hit, stand, double, split, and surrender.
+    </div>
+  `;
+  el("bjDeal").onclick = startBJ;
+  el("bjHit").onclick = bjHit;
+  el("bjStand").onclick = bjStand;
+  el("bjDouble").onclick = bjDouble;
+  el("bjSplit").onclick = bjSplit;
+  el("bjSurrender").onclick = bjSurrender;
+  el("bjBet").onchange = e => state.bet = Math.max(10, parseInt(e.target.value || "10", 10));
+  renderBJHands();
+}
+
+function renderBJHands() {
+  const d = el("bjDealer"), p = el("bjPlayer");
+  if (!d || !p) return;
+  d.innerHTML = "";
+  p.innerHTML = "";
+  state.dealerHand.forEach((c,i) => d.appendChild(cardEl(c)));
+  state.playerHands.forEach((hand, idx) => {
+    const box = document.createElement("div");
+    box.className = "hand";
+    box.style.minHeight = "0";
+    box.style.border = idx === state.activeHand ? "1px solid rgba(247,201,72,.3)" : "1px dashed rgba(255,255,255,.08)";
+    box.innerHTML = `<div style="width:100%;font-size:12px;color:${idx===state.activeHand?"#ffe9a5":"var(--muted)"}">Hand ${idx + 1} ${idx === state.activeHand ? "• Active" : ""} (${handValue(hand)})</div>`;
+    hand.forEach(c => box.appendChild(cardEl(c)));
+    p.appendChild(box);
+  });
+}
+
+function finishBJ(result) {
+  state.blackjackRound = false;
+  if (result === "win") { state.wallet += state.bet * 2; state.wins++; state.streak++; log("Blackjack win.", "good"); }
+  else if (result === "push") { state.wallet += state.bet; state.pushes++; log("Blackjack push."); }
+  else { state.losses++; state.streak = 0; log("Blackjack loss.", "bad"); }
+  setStatus("Ready");
+  saveGame();
+  updateTop();
+  renderBlackjack();
+}
+
+function startBJ() {
+  const bet = Math.max(10, parseInt(el("bjBet").value || "10", 10));
+  if (bet > state.wallet) return log("Not enough coins for that bet.", "bad");
+  state.bet = bet;
+  state.wallet -= bet;
+  state.deck = makeDeck();
+  state.playerHands = [[draw(state.deck), draw(state.deck)]];
+  state.dealerHand = [draw(state.deck), draw(state.deck)];
+  state.activeHand = 0;
+  state.blackjackRound = true;
+  setStatus("Blackjack in progress");
+  log("Blackjack round started.");
+  updateTop();
+  renderBlackjack();
+}
+
+function currentBJHand() { return state.playerHands[state.activeHand]; }
+
+function advanceBJHand() {
+  while (state.activeHand < state.playerHands.length && handValue(state.playerHands[state.activeHand]) >= 21) state.activeHand++;
+  if (state.activeHand >= state.playerHands.length) bjDealerPlay();
+  else renderBlackjack();
+}
+
+function bjHit() {
+  const h = currentBJHand();
+  h.push(draw(state.deck));
+  if (handValue(h) > 21) {
+    log("Hand busted.", "bad");
+    state.activeHand++;
+    if (state.activeHand >= state.playerHands.length) bjDealerPlay();
+    else renderBlackjack();
+  } else renderBlackjack();
+}
+
+function bjStand() {
+  state.activeHand++;
+  if (state.activeHand >= state.playerHands.length) bjDealerPlay();
+  else renderBlackjack();
+}
+
+function bjDouble() {
+  const h = currentBJHand();
+  if (state.wallet < state.bet) return log("Not enough coins to double.", "bad");
+  state.wallet -= state.bet;
+  state.bet *= 2;
+  h.push(draw(state.deck));
+  if (handValue(h) > 21) finishBJ("lose");
+  else { state.activeHand++; bjDealerPlay(); }
+}
+
+function bjSplit() {
+  const h = currentBJHand();
+  if (h.length !== 2 || h[0].val !== h[1].val) return;
+  if (state.wallet < state.bet) return log("Not enough coins to split.", "bad");
+  state.wallet -= state.bet;
+  const first = [h[0], draw(state.deck)];
+  const second = [h[1], draw(state.deck)];
+  state.playerHands.splice(state.activeHand, 1, first, second);
+  log("Split hand created.");
+  renderBJHands();
+}
+
+function bjSurrender() {
+  state.wallet += Math.floor(state.bet / 2);
+  state.losses++;
+  state.streak = 0;
+  log("You surrendered and recovered half the bet.", "warn");
+  setStatus("Ready");
+  saveGame();
+  updateTop();
+  renderBlackjack();
+}
+
+function bjDealerPlay() {
+  while (handValue(state.dealerHand) < 17) state.dealerHand.push(draw(state.deck));
+  const dealer = handValue(state.dealerHand);
+  const results = state.playerHands.map(h => {
+    const v = handValue(h);
+    if (v > 21) return "lose";
+    if (dealer > 21 || v > dealer) return "win";
+    if (v === dealer) return "push";
+    return "lose";
+  });
+  const wins = results.filter(x => x === "win").length;
+  const pushes = results.filter(x => x === "push").length;
+  const losses = results.filter(x => x === "lose").length;
+  state.wins += wins;
+  state.pushes += pushes;
+  state.losses += losses;
+  if (wins) state.wallet += state.bet * wins * 2;
+  if (pushes) state.wallet += state.bet * pushes;
+  state.streak = wins ? state.streak + wins : 0;
+  log(`Blackjack ended: ${wins} win(s), ${pushes} push(es), ${losses} loss(es).`);
+  finishBJ(wins > 0 ? "win" : pushes > 0 ? "push" : "lose");
+}
+
+function renderPoker() {
+  if (!state.poker.playerCards.length) {
+    state.poker = {
+      pot: 0, playerBet: 0, botBet: 0,
+      playerCards: [], botCards: [],
+      phase: 0, folded: false
+    };
+  }
+  const p = state.poker;
+  el("gameArea").innerHTML = `
+    <div class="row">
+      <label>Bet</label>
+      <input id="pBet" type="number" min="10" step="10" value="${state.bet}">
+      <button class="action" id="pDeal">Deal</button>
+      <button class="action" id="pCheck">Check</button>
+      <button class="action" id="pCall">Call</button>
+      <button class="action" id="pRaise">Raise</button>
+      <button class="action" id="pFold">Fold</button>
+    </div>
+    <div class="handwrap">
+      <div><strong>Your Hand</strong></div>
+      <div class="hand" id="pPlayer"></div>
+    </div>
+    <div class="handwrap">
+      <div><strong>Bot Hand</strong></div>
+      <div class="hand" id="pBot"></div>
+    </div>
+    <div class="section-note">
+      Poker actions are interactive. This demo uses a simplified showdown to keep it single-file.
+    </div>
+  `;
+  el("pDeal").onclick = pokerDeal;
+  el("pCheck").onclick = () => pokerAction("check");
+  el("pCall").onclick = () => pokerAction("call");
+  el("pRaise").onclick = () => pokerAction("raise");
+  el("pFold").onclick = () => pokerAction("fold");
+  el("pBet").onchange = e => state.bet = Math.max(10, parseInt(e.target.value || "10", 10));
+  renderPokerHands();
+}
+
+function renderPokerHands() {
+  const p = state.poker;
+  const a = el("pPlayer"), b = el("pBot");
+  if (!a || !b) return;
+  a.innerHTML = ""; b.innerHTML = "";
+  p.playerCards.forEach(c => a.appendChild(cardEl(c)));
+  p.botCards.forEach((c, i) => b.appendChild(cardEl(c)));
+}
+
+function pokerDeal() {
+  const bet = Math.max(10, parseInt(el("pBet").value || "10", 10));
+  if (bet > state.wallet) return log("Not enough coins.", "bad");
+  state.bet = bet;
+  state.wallet -= bet;
+  const deck = makeDeck();
+  state.poker.playerCards = [draw(deck), draw(deck), draw(deck)];
+  state.poker.botCards = [draw(deck), draw(deck), draw(deck)];
+  state.poker.phase = 1;
+  state.poker.pot = bet * 2;
+  state.poker.deck = deck;
+  log("Poker hand dealt. Choose your action.");
+  setStatus("Poker in progress");
+  updateTop();
+  renderPoker();
+}
+
+function handScore3(cards) {
+  const vals = cards.map(c => c.val).sort((a,b) => b-a);
+  return vals[0] * 100 + vals[1] * 10 + vals[2];
+}
+
+function pokerAction(action) {
+  const p = state.poker;
+  if (!p.playerCards.length) return;
+  if (action === "fold") {
+    state.losses++;
+    state.streak = 0;
+    log("You folded.", "warn");
+    p.playerCards = [];
+    p.botCards = [];
+    setStatus("Ready");
+    saveGame();
+    updateTop();
+    renderPoker();
+    return;
+  }
+  if (action === "raise") {
+    if (state.wallet < state.bet) return log("Not enough coins to raise.", "bad");
+    state.wallet -= state.bet;
+    p.playerBet += state.bet;
+    p.pot += state.bet;
+    log("You raised.");
+  } else if (action === "call") {
+    if (p.playerBet < p.botBet && state.wallet >= (p.botBet - p.playerBet)) {
+      const diff = p.botBet - p.playerBet;
+      state.wallet -= diff;
+      p.playerBet += diff;
+      p.pot += diff;
+      log("You called.");
+    } else {
+      log("You checked/called the current amount.");
+    }
+  } else if (action === "check") {
+    log("You checked.");
+  }
+  const ps = handScore3(p.playerCards);
+  const bs = handScore3(p.botCards);
+  if (action === "raise" || action === "call" || action === "check") {
+    if (ps > bs) {
+      state.wallet += p.pot;
+      state.wins++;
+      state.streak++;
+      log("You won the poker hand.", "good");
+    } else if (ps === bs) {
+      state.wallet += Math.floor(p.pot / 2);
+      state.pushes++;
+      log("Poker push.");
+    } else {
+      state.losses++;
+      state.streak = 0;
+      log("Poker loss.", "bad");
+    }
+    p.playerCards = [];
+    p.botCards = [];
+    p.pot = 0;
+    setStatus("Ready");
+    saveGame();
+    updateTop();
+    renderPoker();
+  }
+}
+
+const rouletteState = {
+  bets: [],
+  last: "—",
+  currentBet: 50
+};
+
+function renderRoulette() {
+  const nums = [
+    [3,"red"],[6,"black"],[9,"red"],[12,"red"],[15,"black"],[18,"red"],[21,"red"],[24,"black"],[27,"red"],[30,"red"],[33,"black"],[36,"red"],
+    [2,"black"],[5,"red"],[8,"black"],[11,"black"],[14,"red"],[17,"black"],[20,"black"],[23,"red"],[26,"black"],[29,"black"],[32,"red"],[35,"black"],
+    [1,"red"],[4,"black"],[7,"red"],[10,"black"],[13,"black"],[16,"red"],[19,"red"],[22,"black"],[25,"red"],[28,"black"],[31,"black"],[34,"red"]
+  ];
+  el("gameArea").innerHTML = `
+    <div class="roulette">
+      <div class="wheelinfo">
+        <label>Chip Size</label>
+        <input id="rBet" type="number" min="10" step="10" value="${rouletteState.currentBet}">
+        <button class="action" id="rSpin">Spin Wheel</button>
+        <button class="action" id="rClear">Clear Bets</button>
+        <span class="chip">Last Result: <strong>${rouletteState.last}</strong></span>
+      </div>
+
+      <div class="row">
+        <span class="bettag">Click a box to bet that area</span>
+        <span class="bettag">Inside bets and outside bets are both available</span>
+      </div>
+
+      <div class="roulette-board" id="rouletteBoard">
+        <div class="zero" data-bet='{"type":"straight","target":"0"}'>0</div>
+        ${nums.map(([n,c]) => `<div class="cell ${c}" data-bet='{"type":"straight","target":"${n}"}'>${n}</div>`).join("")}
+        <div class="column" data-bet='{"type":"column","target":"1"}'>2:1</div>
+        <div class="zero" style="display:none"></div>
+
+        <div class="outside redbet" data-bet='{"type":"color","target":"red"}'>Red</div>
+        <div class="outside blackbet" data-bet='{"type":"color","target":"black"}'>Black</div>
+        <div class="outside greenbet" data-bet='{"type":"color","target":"green"}'>0</div>
+
+        <div class="dozen" data-bet='{"type":"dozen","target":"1"}'>1st 12</div>
+        <div class="dozen" data-bet='{"type":"dozen","target":"2"}'>2nd 12</div>
+        <div class="dozen" data-bet='{"type":"dozen","target":"3"}'>3rd 12</div>
+
+        <div class="outside rowbet" data-bet='{"type":"outside","target":"odd"}'>Odd</div>
+        <div class="outside rowbet" data-bet='{"type":"outside","target":"even"}'>Even</div>
+        <div class="outside rowbet" data-bet='{"type":"outside","target":"high"}'>1–18 / 19–36</div>
+      </div>
+
+      <div class="footerline">
+        <div class="outside" data-bet='{"type":"outside","target":"low"}'>Low</div>
+        <div class="outside" data-bet='{"type":"outside","target":"high"}'>High</div>
+        <div class="outside" data-bet='{"type":"column","target":"2"}'>2:1</div>
+      </div>
+
+      <div class="card" style="padding:14px">
+        <div><strong>Selected Bets</strong></div>
+        <div class="chipstack" id="rouletteBets"></div>
+      </div>
+    </div>
+  `;
+  el("rSpin").onclick = spinRoulette;
+  el("rClear").onclick = () => { rouletteState.bets = []; renderRouletteBets(); };
+  el("rBet").onchange = e => rouletteState.currentBet = Math.max(10, parseInt(e.target.value || "10", 10));
+  document.querySelectorAll("[data-bet]").forEach(node => {
+    node.onclick = () => {
+      rouletteState.bets.push({ ...JSON.parse(node.dataset.bet), amount: rouletteState.currentBet });
+      renderRouletteBets();
+      log("Roulette bet placed.");
+    };
+  });
+  renderRouletteBets();
+}
+
+function renderRouletteBets() {
+  const box = el("rouletteBets");
+  if (!box) return;
+  box.innerHTML = rouletteState.bets.length
+    ? rouletteState.bets.map(b => `<span class="bettag">${b.type}:${b.target} • ${fmt(b.amount)}</span>`).join("")
+    : `<span class="muted">No bets placed.</span>`;
+}
+
+function spinRoulette() {
+  if (!rouletteState.bets.length) return log("Place at least one bet first.", "warn");
+  const total = rouletteState.bets.reduce((a,b)=>a+b.amount,0);
+  if (total > state.wallet) return log("Not enough coins for all those bets.", "bad");
+  state.wallet -= total;
+  const n = Math.floor(Math.random() * 37);
+  const color = n === 0 ? "green" : [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36].includes(n) ? "red" : "black";
+  const dozen = n === 0 ? null : Math.ceil(n / 12);
+  const column = n === 0 ? null : ((n - 1) % 3) + 1;
+  const oddEven = n === 0 ? null : n % 2 ? "odd" : "even";
+  const highLow = n === 0 ? null : n <= 18 ? "low" : "high";
+
+  let payout = 0;
+  rouletteState.bets.forEach(b => {
+    let win = false;
+    let mult = 0;
+    if (b.type === "straight" && String(n) === String(b.target)) { win = true; mult = 35; }
+    if (b.type === "color" && b.target === color) { win = true; mult = 1; }
+    if (b.type === "dozen" && dozen && String(dozen) === String(b.target)) { win = true; mult = 2; }
+    if (b.type === "column" && column && String(column) === String(b.target)) { win = true; mult = 2; }
+    if (b.type === "outside" && b.target === oddEven) { win = true; mult = 1; }
+    if (b.type === "outside" && b.target === highLow) { win = true; mult = 1; }
+    if (win) payout += b.amount * (mult + 1);
+  });
+
+  state.wallet += payout;
+  if (payout > 0) { state.wins++; state.streak++; log(`Roulette hit ${n} (${color}). Payout ${fmt(payout)}.`, "good"); }
+  else { state.losses++; state.streak = 0; log(`Roulette hit ${n} (${color}). No win.`, "bad"); }
+  rouletteState.last = `${n} • ${color}`;
+  rouletteState.bets = [];
+  setStatus("Ready");
+  saveGame();
+  updateTop();
+  renderRoulette();
+}
+
+function renderWar() {
+  if (!state.war.player.length) {
+    const deck = makeDeck();
+    state.war.player = deck.slice(0,26);
+    state.war.bot = deck.slice(26);
+    state.war.pile = [];
+  }
+  el("gameArea").innerHTML = `
+    <div class="row">
+      <button class="action" id="warFlip">Flip Cards</button>
+      <button class="action" id="warReset">New Game</button>
+    </div>
+    <div class="handwrap"><div><strong>Your Top Card</strong></div><div class="hand" id="warPlayer"></div></div>
+    <div class="handwrap"><div><strong>Bot Top Card</strong></div><div class="hand" id="warBot"></div></div>
+    <div class="section-note">War is simple: high card wins, ties trigger a war pile.</div>
+  `;
+  el("warFlip").onclick = warFlip;
+  el("warReset").onclick = () => { state.war = { player: [], bot: [], pile: [], round: false }; renderWar(); };
+  renderWarHands();
+}
+
+function renderWarHands() {
+  const p = el("warPlayer"), b = el("warBot");
+  if (!p || !b) return;
+  p.innerHTML = ""; b.innerHTML = "";
+  if (state.war.player.length) p.appendChild(cardEl(state.war.player[0]));
+  if (state.war.bot.length) b.appendChild(cardEl(state.war.bot[0]));
+}
+
+function warFlip() {
+  if (!state.war.player.length || !state.war.bot.length) return;
+  const pc = state.war.player.shift();
+  const bc = state.war.bot.shift();
+  if (pc.val > bc.val) {
+    state.war.player.push(pc, bc, ...state.war.pile);
+    state.war.pile = [];
+    state.wins++;
+    state.streak++;
+    log("War round won.", "good");
+  } else if (bc.val > pc.val) {
+    state.war.bot.push(pc, bc, ...state.war.pile);
+    state.war.pile = [];
+    state.losses++;
+    state.streak = 0;
+    log("War round lost.", "bad");
+  } else {
+    state.war.pile.push(pc, bc);
+    log("War! Tie added to the pile.", "warn");
+  }
+  saveGame();
+  updateTop();
+  renderWar();
+}
+
+function renderGoFish() {
+  if (!state.gofish.player.length) {
+    const deck = makeDeck();
+    state.gofish.player = deck.splice(0,7);
+    state.gofish.bot = deck.splice(0,7);
+    state.gofish.deck = deck;
+    state.gofish.asks = 0;
+  }
+  el("gameArea").innerHTML = `
+    <div class="row">
+      <select id="gfRank">${names.map(n => `<option>${n}</option>`).join("")}</select>
+      <button class="action" id="gfAsk">Ask Bot</button>
+      <button class="action" id="gfDraw">Draw</button>
+      <button class="action" id="gfReset">New Game</button>
+    </div>
+    <div class="handwrap"><div><strong>Your Hand</strong></div><div class="hand" id="gfPlayer"></div></div>
+    <div class="handwrap"><div><strong>Bot Hand</strong></div><div class="hand" id="gfBot"></div></div>
+    <div class="section-note">Ask for a rank, then draw if the bot says go fish.</div>
+  `;
+  el("gfAsk").onclick = gfAsk;
+  el("gfDraw").onclick = gfDraw;
+  el("gfReset").onclick = () => { state.gofish = { player: [], bot: [], asks: 0, target: null, drawn: false }; renderGoFish(); };
+  renderGoFishHands();
+}
+
+function renderGoFishHands() {
+  const p = el("gfPlayer"), b = el("gfBot");
+  if (!p || !b) return;
+  p.innerHTML = ""; b.innerHTML = "";
+  state.gofish.player.forEach(c => p.appendChild(cardEl(c)));
+  state.gofish.bot.forEach(c => b.appendChild(cardEl(c)));
+}
+
+function gfAsk() {
+  const rank = el("gfRank").value;
+  const matches = state.gofish.bot.filter(c => c.name === rank);
+  if (matches.length) {
+    state.gofish.bot = state.gofish.bot.filter(c => c.name !== rank);
+    state.gofish.player.push(...matches);
+    state.wins++;
+    state.streak++;
+    log(`Go Fish success: got ${rank}s.`, "good");
+  } else {
+    log("Go fish.", "warn");
+  }
+  state.gofish.asks++;
+  saveGame();
+  updateTop();
+  renderGoFish();
+}
+
+function gfDraw() {
+  if (!state.gofish.deck.length) return log("Deck is empty.", "warn");
+  state.gofish.player.push(draw(state.gofish.deck));
+  log("You drew a card.");
+  renderGoFish();
+}
+
+function renderCrazy() {
+  if (!state.crazy.player.length) {
+    const deck = makeDeck();
+    state.crazy.player = deck.splice(0,5);
+    state.crazy.bot = deck.splice(0,5);
+    state.crazy.deck = deck;
+    state.crazy.top = draw(state.crazy.deck);
+    state.crazy.suit = state.crazy.top.suit;
+  }
+  el("gameArea").innerHTML = `
+    <div class="row">
+      <select id="czSuit">${suits.map(s => `<option>${s}</option>`).join("")}</select>
+      <button class="action" id="czPlay">Play Selected Card</button>
+      <button class="action" id="czDraw">Draw</button>
+      <button class="action" id="czReset">New Game</button>
+      <span class="chip">Top Card: ${state.crazy.top.name}${state.crazy.top.suit}</span>
+      <span class="chip">Current Suit: ${state.crazy.suit}</span>
+    </div>
+    <div class="handwrap"><div><strong>Your Hand</strong></div><div class="hand" id="czPlayer"></div></div>
+    <div class="handwrap"><div><strong>Bot Hand</strong></div><div class="hand" id="czBot"></div></div>
+    <div class="section-note">Play a matching rank or suit, or use an eight and choose a new suit.</div>
+  `;
+  el("czPlay").onclick = czPlay;
+  el("czDraw").onclick = czDraw;
+  el("czReset").onclick = () => { state.crazy = { player: [], bot: [], top: null, suit: "♠", deck: [] }; renderCrazy(); };
+  renderCrazyHands();
+}
+
+function renderCrazyHands() {
+  const p = el("czPlayer"), b = el("czBot");
+  if (!p || !b) return;
+  p.innerHTML = ""; b.innerHTML = "";
+  state.crazy.player.forEach(c => p.appendChild(cardEl(c)));
+  state.crazy.bot.forEach(c => b.appendChild(cardEl(c)));
+}
+
+function czPlay() {
+  const suit = el("czSuit").value;
+  const idx = state.crazy.player.findIndex(c => c.suit === state.crazy.suit || c.name === state.crazy.top.name || c.name === "8");
+  if (idx === -1) return log("No playable card.", "warn");
+  const card = state.crazy.player.splice(idx,1)[0];
+  state.crazy.top = card;
+  if (card.name === "8") state.crazy.suit = suit;
+  else state.crazy.suit = card.suit;
+  state.wins++;
+  state.streak++;
+  log(`Played ${card.name}${card.suit}.`, "good");
+  saveGame();
+  updateTop();
+  renderCrazy();
+}
+
+function czDraw() {
+  if (!state.crazy.deck.length) return log("Deck empty.", "warn");
+  state.crazy.player.push(draw(state.crazy.deck));
+  log("You drew a card.");
+  renderCrazy();
+}
+
+function renderRummy() {
+  if (!state.rummy.player.length) {
+    const deck = makeDeck();
+    state.rummy.player = deck.splice(0,7);
+    state.rummy.bot = deck.splice(0,7);
+    state.rummy.deck = deck;
+    state.rummy.discards = [draw(state.rummy.deck)];
+  }
+  el("gameArea").innerHTML = `
+    <div class="row">
+      <button class="action" id="rmDraw">Draw</button>
+      <button class="action" id="rmDiscard">Discard Selected</button>
+      <button class="action" id="rmKnock">Knock</button>
+      <button class="action" id="rmReset">New Game</button>
+      <span class="chip">Top Discard: ${state.rummy.discards[state.rummy.discards.length-1].name}${state.rummy.discards[state.rummy.discards.length-1].suit}</span>
+    </div>
+    <div class="handwrap"><div><strong>Your Hand</strong></div><div class="hand" id="rmPlayer"></div></div>
+    <div class="handwrap"><div><strong>Bot Hand</strong></div><div class="hand" id="rmBot"></div></div>
+    <div class="section-note">Choose whether to draw, discard, or knock when your hand looks ready.</div>
+  `;
+  el("rmDraw").onclick = rmDraw;
+  el("rmDiscard").onclick = rmDiscard;
+  el("rmKnock").onclick = rmKnock;
+  el("rmReset").onclick = () => { state.rummy = { player: [], bot: [], discards: [], deck: [], drawPhase: false }; renderRummy(); };
+  renderRummyHands();
+}
+
+function renderRummyHands() {
+  const p = el("rmPlayer"), b = el("rmBot");
+  if (!p || !b) return;
+  p.innerHTML = ""; b.innerHTML = "";
+  state.rummy.player.forEach(c => p.appendChild(cardEl(c)));
+  state.rummy.bot.forEach(c => b.appendChild(cardEl(c)));
+}
+
+function rmDraw() {
+  if (!state.rummy.deck.length) return log("Deck empty.", "warn");
+  state.rummy.player.push(draw(state.rummy.deck));
+  log("You drew a card.");
+  renderRummy();
+}
+
+function rmDiscard() {
+  const c = state.rummy.player.pop();
+  if (!c) return;
+  state.rummy.discards.push(c);
+  log(`Discarded ${c.name}${c.suit}.`);
+  renderRummy();
+}
+
+function rmKnock() {
+  state.wins++;
+  state.streak++;
+  log("You knocked and ended the hand.", "good");
+  saveGame();
+  updateTop();
+  renderRummy();
+}
+
+function renderHearts() {
+  if (!state.hearts.player.length) {
+    const deck = makeDeck();
+    state.hearts.player = deck.splice(0,13);
+    state.hearts.bot = deck.splice(0,13);
+    state.hearts.deck = deck;
+    state.hearts.trick = [];
+  }
+  el("gameArea").innerHTML = `
+    <div class="row">
+      <button class="action" id="htPass">Pass 3 Cards</button>
+      <button class="action" id="htPlay">Play Selected Card</button>
+      <button class="action" id="htReset">New Game</button>
+    </div>
+    <div class="handwrap"><div><strong>Your Hand</strong></div><div class="hand" id="htPlayer"></div></div>
+    <div class="handwrap"><div><strong>Bot Hand</strong></div><div class="hand" id="htBot"></div></div>
+    <div class="section-note">Hearts is trick-taking: pass cards, then choose which card to play.</div>
+  `;
+  el("htPass").onclick = htPass;
+  el("htPlay").onclick = htPlay;
+  el("htReset").onclick = () => { state.hearts = { player: [], bot: [], trick: [], lead: "player", deck: [] }; renderHearts(); };
+  renderHeartsHands();
+}
+
+function renderHeartsHands() {
+  const p = el("htPlayer"), b = el("htBot");
+  if (!p || !b) return;
+  p.innerHTML = ""; b.innerHTML = "";
+  state.hearts.player.forEach(c => p.appendChild(cardEl(c)));
+  state.hearts.bot.forEach(c => b.appendChild(cardEl(c)));
+}
+
+function htPass() {
+  const passed = state.hearts.player.splice(0,3);
+  state.hearts.bot.push(...passed);
+  log("You passed 3 cards.");
+  renderHearts();
+}
+
+function htPlay() {
+  const c = state.hearts.player.shift();
+  if (!c) return;
+  log(`Played ${c.name}${c.suit}.`);
+  if (c.suit === "♥") { state.wins++; state.streak++; }
+  saveGame();
+  updateTop();
+  renderHearts();
+}
+
+function renderSpades() {
+  if (!state.hearts.player.length) {
+    const deck = makeDeck();
+    state.hearts.player = deck.splice(0,13);
+    state.hearts.bot = deck.splice(0,13);
+    state.hearts.deck = deck;
+  }
+  el("gameArea").innerHTML = `
+    <div class="row">
+      <input id="spBid" type="number" min="0" step="1" value="3" style="width:90px">
+      <button class="action" id="spBidBtn">Set Bid</button>
+      <button class="action" id="spPlay">Play Card</button>
+      <button class="action" id="spReset">New Game</button>
+      <span class="chip">Bid is a simple target for the demo</span>
+    </div>
+    <div class="handwrap"><div><strong>Your Hand</strong></div><div class="hand" id="spPlayer"></div></div>
+    <div class="handwrap"><div><strong>Bot Hand</strong></div><div class="hand" id="spBot"></div></div>
+    <div class="section-note">Spades is trick-taking and bid-based. This demo keeps the flow simple and interactive.</div>
+  `;
+  el("spBidBtn").onclick = () => { state.spadesBid = parseInt(el("spBid").value || "0", 10); log("Bid set."); };
+  el("spPlay").onclick = spPlay;
+  el("spReset").onclick = () => { state.hearts = { player: [], bot: [], trick: [], lead: "player", deck: [] }; renderSpades(); };
+  renderSpadesHands();
+}
+
+function renderSpadesHands() {
+  const p = el("spPlayer"), b = el("spBot");
+  if (!p || !b) return;
+  p.innerHTML = ""; b.innerHTML = "";
+  state.hearts.player.forEach(c => p.appendChild(cardEl(c)));
+  state.hearts.bot.forEach(c => b.appendChild(cardEl(c)));
+}
+
+function spPlay() {
+  const c = state.hearts.player.shift();
+  if (!c) return;
+  log(`You played ${c.name}${c.suit}.`);
+  if (c.suit === "♠") { state.wins++; state.streak++; }
+  saveGame();
+  updateTop();
+  renderSpades();
+}
+
+document.getElementById("saveBtn").onclick = saveGame;
+document.getElementById("resetBtn").onclick = resetSave;
+
+loadGame();
+renderMenu();
+renderMode();
+renderGame();
+updateTop();
+log("Welcome to Arcade Lounge.", "good");
 </script>
 </body>
 </html>
