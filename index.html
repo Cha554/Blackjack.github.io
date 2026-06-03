@@ -189,14 +189,24 @@
   </div>
 </div>
 
-<script src="/socket.io/socket.io.js"></script>
+<script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
 <script>
 const STORAGE_KEY = "arcade_lounge_save_v2";
+const SOCKET_URL = "https://serevr-github-io.onrender.com/";
+
 const state = {
   mode:"blackjack", wallet:10000, wins:0, losses:0, pushes:0, streak:0, status:"Ready",
   bet:100, deck:[], playerHands:[[]], dealerHand:[], activeHand:0, blackjackRound:false,
-  socket:null, room:"", online:false
+  socket:null, room:"", online:false,
+  poker:{ pot:0, playerBet:0, botBet:0, playerCards:[], botCards:[], phase:0, folded:false, deck:[] },
+  rouletteState:{ bets:[], last:"—", chip:50 },
+  war:{ player:[], bot:[], pile:[] },
+  gofish:{ player:[], bot:[], deck:[] },
+  crazy:{ player:[], bot:[], top:null, suit:"♠", deck:[] },
+  rummy:{ player:[], bot:[], deck:[], discards:[] },
+  hearts:{ player:[], bot:[], deck:[] }
 };
+
 const suits=["♠","♥","♦","♣"], names=["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
 const el=id=>document.getElementById(id), fmt=n=>Number(n||0).toLocaleString();
 
@@ -374,7 +384,6 @@ function renderBlackjack(){
 
 /* Poker */
 function renderPoker(){
-  if(!state.poker) state.poker = { pot:0, playerBet:0, botBet:0, playerCards:[], botCards:[], phase:0, folded:false, deck:[] };
   el("gameArea").innerHTML=`
     <div class="row">
       <label>Bet</label><input id="pBet" type="number" min="10" step="10" value="${state.bet}">
@@ -466,7 +475,7 @@ function renderRoulette(){
 }
 function renderRouletteBets(){
   const box=el("rouletteBets"); if(!box) return;
-  box.innerHTML=rouletteState.bets.length ? rouletteState.bets.map(b=>`<span class="chip">${b.type}:${b.target} • ${fmt(b.amount)}</span>`).join(" ") : `<span class="muted">No bets placed.</span>`;
+  box.innerHTML=rouletteState.bets.length ? rouletteState.bets.map(b=>`<span class="chip">${b.type}:${b.target} • ${fmt(b.amount)}</span>`).join("") : `<span class="muted">No bets placed.</span>`;
 }
 function spinRoulette(){
   if(!rouletteState.bets.length) return log("Place at least one bet first.","warn");
@@ -493,9 +502,8 @@ function spinRoulette(){
   rouletteState.last=`${n} • ${color}`; rouletteState.bets=[]; setStatus("Ready"); saveGame(); updateTop(); renderRoulette();
 }
 
-/* Other games: simplified but interactive */
+/* Other games */
 function renderWar(){
-  if(!state.war){ state.war={player:[],bot:[],pile:[]}; }
   if(!state.war.player.length){ const deck=makeDeck(); state.war.player=deck.slice(0,26); state.war.bot=deck.slice(26); state.war.pile=[]; }
   el("gameArea").innerHTML=`<div class="row"><button class="action" id="warFlip">Flip Cards</button><button class="action" id="warReset">New Game</button></div><div class="handwrap"><div><strong>Your Top Card</strong></div><div class="hand" id="warPlayer"></div></div><div class="handwrap"><div><strong>Bot Top Card</strong></div><div class="hand" id="warBot"></div></div>`;
   el("warFlip").onclick=warFlip; el("warReset").onclick=()=>{ state.war={player:[],bot:[],pile:[]}; renderWar(); };
@@ -511,7 +519,6 @@ function warFlip(){
 }
 
 function renderGoFish(){
-  if(!state.gofish) state.gofish={player:[],bot:[],deck:[]};
   if(!state.gofish.player.length){ const deck=makeDeck(); state.gofish.player=deck.splice(0,7); state.gofish.bot=deck.splice(0,7); state.gofish.deck=deck; }
   el("gameArea").innerHTML=`<div class="row"><select id="gfRank">${names.map(n=>`<option>${n}</option>`).join("")}</select><button class="action" id="gfAsk">Ask Bot</button><button class="action" id="gfDraw">Draw</button><button class="action" id="gfReset">New Game</button></div><div class="handwrap"><div><strong>Your Hand</strong></div><div class="hand" id="gfPlayer"></div></div><div class="handwrap"><div><strong>Bot Hand</strong></div><div class="hand" id="gfBot"></div></div>`;
   el("gfAsk").onclick=gfAsk; el("gfDraw").onclick=gfDraw; el("gfReset").onclick=()=>{ state.gofish={player:[],bot:[],deck:[]}; renderGoFish(); };
@@ -521,7 +528,6 @@ function gfAsk(){ const rank=el("gfRank").value; const matches=state.gofish.bot.
 function gfDraw(){ if(!state.gofish.deck.length) return log("Deck is empty.","warn"); state.gofish.player.push(draw(state.gofish.deck)); renderGoFish(); }
 
 function renderCrazy(){
-  if(!state.crazy) state.crazy={player:[],bot:[],top:null,suit:"♠",deck:[]};
   if(!state.crazy.player.length){ const deck=makeDeck(); state.crazy.player=deck.splice(0,5); state.crazy.bot=deck.splice(0,5); state.crazy.deck=deck; state.crazy.top=draw(state.crazy.deck); state.crazy.suit=state.crazy.top.suit; }
   el("gameArea").innerHTML=`<div class="row"><select id="czSuit">${suits.map(s=>`<option>${s}</option>`).join("")}</select><button class="action" id="czPlay">Play Selected Card</button><button class="action" id="czDraw">Draw</button><button class="action" id="czReset">New Game</button><span class="chip">Top Card: ${state.crazy.top.name}${state.crazy.top.suit}</span><span class="chip">Current Suit: ${state.crazy.suit}</span></div><div class="handwrap"><div><strong>Your Hand</strong></div><div class="hand" id="czPlayer"></div></div><div class="handwrap"><div><strong>Bot Hand</strong></div><div class="hand" id="czBot"></div></div>`;
   el("czPlay").onclick=czPlay; el("czDraw").onclick=czDraw; el("czReset").onclick=()=>{ state.crazy={player:[],bot:[],top:null,suit:"♠",deck:[]}; renderCrazy(); };
@@ -531,7 +537,6 @@ function czPlay(){ const suit=el("czSuit").value; const idx=state.crazy.player.f
 function czDraw(){ if(!state.crazy.deck.length) return log("Deck empty.","warn"); state.crazy.player.push(draw(state.crazy.deck)); renderCrazy(); }
 
 function renderRummy(){
-  if(!state.rummy) state.rummy={player:[],bot:[],deck:[],discards:[]};
   if(!state.rummy.player.length){ const deck=makeDeck(); state.rummy.player=deck.splice(0,7); state.rummy.bot=deck.splice(0,7); state.rummy.deck=deck; state.rummy.discards=[draw(state.rummy.deck)]; }
   const top=state.rummy.discards[state.rummy.discards.length-1];
   el("gameArea").innerHTML=`<div class="row"><button class="action" id="rmDraw">Draw</button><button class="action" id="rmDiscard">Discard Last</button><button class="action" id="rmKnock">Knock</button><button class="action" id="rmReset">New Game</button><span class="chip">Top Discard: ${top.name}${top.suit}</span></div><div class="handwrap"><div><strong>Your Hand</strong></div><div class="hand" id="rmPlayer"></div></div><div class="handwrap"><div><strong>Bot Hand</strong></div><div class="hand" id="rmBot"></div></div>`;
@@ -543,7 +548,6 @@ function rmDiscard(){ const c=state.rummy.player.pop(); if(!c) return; state.rum
 function rmKnock(){ state.wins++; state.streak++; log("You knocked and ended the hand.","good"); saveGame(); updateTop(); renderRummy(); }
 
 function renderHearts(){
-  if(!state.hearts) state.hearts={player:[],bot:[],deck:[]};
   if(!state.hearts.player.length){ const deck=makeDeck(); state.hearts.player=deck.splice(0,13); state.hearts.bot=deck.splice(0,13); state.hearts.deck=deck; }
   el("gameArea").innerHTML=`<div class="row"><button class="action" id="htPass">Pass 3 Cards</button><button class="action" id="htPlay">Play Top Card</button><button class="action" id="htReset">New Game</button></div><div class="handwrap"><div><strong>Your Hand</strong></div><div class="hand" id="htPlayer"></div></div><div class="handwrap"><div><strong>Bot Hand</strong></div><div class="hand" id="htBot"></div></div>`;
   el("htPass").onclick=htPass; el("htPlay").onclick=htPlay; el("htReset").onclick=()=>{ state.hearts={player:[],bot:[],deck:[]}; renderHearts(); };
@@ -553,7 +557,6 @@ function htPass(){ const passed=state.hearts.player.splice(0,3); state.hearts.bo
 function htPlay(){ const c=state.hearts.player.shift(); if(!c) return; log(`Played ${c.name}${c.suit}.`); if(c.suit==="♥"){ state.wins++; state.streak++; } saveGame(); updateTop(); renderHearts(); }
 
 function renderSpades(){
-  if(!state.hearts) state.hearts={player:[],bot:[],deck:[]};
   if(!state.hearts.player.length){ const deck=makeDeck(); state.hearts.player=deck.splice(0,13); state.hearts.bot=deck.splice(0,13); state.hearts.deck=deck; }
   el("gameArea").innerHTML=`<div class="row"><input id="spBid" type="number" min="0" step="1" value="${state.spadesBid||3}" style="width:90px"><button class="action" id="spBidBtn">Set Bid</button><button class="action" id="spPlay">Play Top Card</button><button class="action" id="spReset">New Game</button></div><div class="handwrap"><div><strong>Your Hand</strong></div><div class="hand" id="spPlayer"></div></div><div class="handwrap"><div><strong>Bot Hand</strong></div><div class="hand" id="spBot"></div></div>`;
   el("spBidBtn").onclick=()=>{ state.spadesBid=parseInt(el("spBid").value||"0",10); log("Bid set."); };
@@ -564,10 +567,9 @@ function spPlay(){ const c=state.hearts.player.shift(); if(!c) return; log(`You 
 
 /* Online room code support */
 function connectSocket(){
-  const url = window.location.origin;
-  state.socket = io(url, { autoConnect:false });
+  state.socket = io(SOCKET_URL, { autoConnect:false });
   state.socket.on("connect", ()=>{ state.online=true; setStatus("Connected"); updateTop(); log("Connected to server.","good"); });
-  state.socket.on("roomCreated", (data)=>{ state.room=data.room; state.socket.emit("joinRoom", { room:data.room }); el("roomInput").value = data.room; });
+  state.socket.on("roomCreated", (data)=>{ state.room=data.room; el("roomInput").value = data.room; state.socket.emit("joinRoom", { room:data.room }); });
   state.socket.on("roomJoined", (data)=>{ state.room=data.room; state.online=true; updateTop(); log("Joined room " + data.room, "good"); });
   state.socket.on("roomError", (msg)=>{ log(msg,"bad"); });
   state.socket.on("disconnect", ()=>{ state.online=false; state.room=""; updateTop(); log("Disconnected from server.","warn"); });
@@ -575,18 +577,22 @@ function connectSocket(){
 document.getElementById("onlineBtn").onclick=()=>{ el("onlineBox").style.display="flex"; };
 document.getElementById("closeOnlineBtn").onclick=()=>{ el("onlineBox").style.display="none"; };
 document.getElementById("createRoomBtn").onclick=()=>{
-  if(!state.socket){ connectSocket(); state.socket.connect(); }
+  if(!state.socket) connectSocket();
+  if(!state.socket.connected) state.socket.connect();
   state.socket.emit("createRoom");
 };
 document.getElementById("joinRoomBtn").onclick=()=>{
-  if(!state.socket){ connectSocket(); state.socket.connect(); }
-  const room = el("roomInput").value.trim();
+  if(!state.socket) connectSocket();
+  if(!state.socket.connected) state.socket.connect();
+  const room = el("roomInput").value.trim().toUpperCase();
   if(!room) return log("Enter a room code.","warn");
   state.socket.emit("joinRoom", { room });
 };
 document.getElementById("connectBtn").onclick=()=>{
-  if(!state.socket){ connectSocket(); }
+  if(!state.socket) connectSocket();
   if(!state.socket.connected) state.socket.connect();
+  const room = el("roomInput").value.trim().toUpperCase();
+  if(room) state.socket.emit("joinRoom", { room });
 };
 
 /* Buttons */
@@ -594,7 +600,12 @@ document.getElementById("saveBtn").onclick=saveGame;
 document.getElementById("resetBtn").onclick=resetSave;
 
 /* Init */
-loadGame(); connectSocket(); renderMenu(); renderMode(); updateTop(); log("Welcome to Arcade Lounge.","good");
+loadGame();
+connectSocket();
+renderMenu();
+renderMode();
+updateTop();
+log("Welcome to Arcade Lounge.","good");
 </script>
 </body>
 </html>
