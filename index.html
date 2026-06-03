@@ -2,508 +2,120 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Blackjack</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Arcade Lounge Demo</title>
   <style>
-    :root{
-      --bg:#0d5f31;
-      --panel:#113f22;
-      --text:#f4f7f2;
-      --muted:#cde0cf;
-      --accent:#ffd54a;
-      --danger:#ff6b6b;
-      --ok:#7dffb2;
-      --card:#fdfdfd;
-      --cardText:#111;
-      --border:rgba(255,255,255,.18);
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-      background:radial-gradient(circle at top, #138047, var(--bg));
-      color:var(--text);
-      min-height:100vh;
-    }
-    .wrap{max-width:1200px;margin:0 auto;padding:16px}
-    h1,h2,h3,p{margin:0}
-    .topbar,.panel,.hand,.playerCard,.status{
-      background:rgba(0,0,0,.18);
-      border:1px solid var(--border);
-      border-radius:16px;
-      box-shadow:0 10px 24px rgba(0,0,0,.18);
-    }
-    .topbar{
-      display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between;
-      padding:14px 16px;margin-bottom:14px;
-    }
-    .stats{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
-    .pill{padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.10)}
-    .grid{display:grid;grid-template-columns:1.4fr .9fr;gap:14px}
-    @media (max-width:900px){.grid{grid-template-columns:1fr}}
-    .panel{padding:16px}
-    .hand{padding:12px;margin-top:10px}
-    .cards{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-    .card{
-      width:72px;height:100px;border-radius:10px;background:var(--card);color:var(--cardText);
-      display:flex;flex-direction:column;justify-content:space-between;padding:8px;
-      font-weight:700;border:1px solid #ddd;
-    }
-    .card.red{color:#c21d1d}
-    .card .big{font-size:22px;line-height:1}
-    .card .small{font-size:14px;line-height:1}
-    .back{
-      background:linear-gradient(135deg,#1f4ea3,#0b2f6f);
-      color:white;align-items:center;justify-content:center;font-size:22px
-    }
-    .controls{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
-    button,select,input{
-      border:none;border-radius:12px;padding:12px 14px;font-size:16px
-    }
-    button{
-      background:var(--accent);color:#1a1a1a;font-weight:700;cursor:pointer
-    }
-    button.secondary{background:#d7e3d7}
-    button.danger{background:var(--danger);color:white}
-    button:disabled{opacity:.5;cursor:not-allowed}
-    input,select{
-      background:#f1f4f1;color:#111;min-width:120px
-    }
-    .status{
-      padding:14px;margin-top:14px;font-weight:700
-    }
-    .status.win{border-color:rgba(125,255,178,.45);color:var(--ok)}
-    .status.lose{border-color:rgba(255,107,107,.45);color:#ffb0b0}
-    .status.push{color:#f7e7b0}
-    .playerList{display:grid;gap:10px}
-    .playerCard{padding:12px}
-    .playerCard.active{outline:2px solid var(--accent)}
-    .subtle{color:var(--muted);font-size:14px;margin-top:6px}
-    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    .label{font-weight:700}
-    a{color:#ffe98e}
+    :root{--bg:#08111f;--panel:#0f1b2f;--panel2:#13233d;--gold:#f7c948;--gold2:#d8a73a;--text:#eaf1ff;--muted:#9fb0d0;--good:#42d392;--bad:#ff6b6b;--accent:#7c5cff;--line:rgba(255,255,255,.08)}
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:radial-gradient(circle at top,#122447 0,#08111f 45%,#040910 100%);color:var(--text)}
+    .app{min-height:100vh;display:grid;grid-template-rows:auto 1fr} .topbar{display:flex;justify-content:space-between;align-items:center;padding:18px 24px;border-bottom:1px solid var(--line);backdrop-filter:blur(10px);background:rgba(4,9,16,.45);position:sticky;top:0;z-index:5}
+    .brand{display:flex;gap:12px;align-items:center}.logo{width:44px;height:44px;border-radius:14px;background:linear-gradient(145deg,var(--gold),#fff0b0);box-shadow:0 0 30px rgba(247,201,72,.25)}
+    .brand h1{font-size:18px;margin:0}.brand p{margin:2px 0 0;color:var(--muted);font-size:12px}
+    .pillrow{display:flex;gap:10px;flex-wrap:wrap}.pill{padding:10px 14px;border:1px solid var(--line);background:rgba(255,255,255,.04);border-radius:999px;font-size:13px;color:var(--text)}
+    .pill strong{color:var(--gold)}
+    .layout{display:grid;grid-template-columns:260px 1fr 320px;gap:18px;padding:18px;max-width:1600px;width:100%;margin:0 auto}
+    .panel{background:linear-gradient(180deg,rgba(19,35,61,.96),rgba(10,18,32,.96));border:1px solid var(--line);border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+    .sidebar,.rightbar{padding:18px} .sidebar h2,.rightbar h2{margin:0 0 12px;font-size:15px;color:#fff}
+    .menu{display:grid;gap:10px}.menu button,.action{width:100%;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--text);padding:14px 14px;border-radius:16px;cursor:pointer;text-align:left;transition:.2s}
+    .menu button.active,.menu button:hover,.action:hover{transform:translateY(-1px);border-color:rgba(247,201,72,.35);background:rgba(247,201,72,.08)}
+    .main{padding:18px} .hero{display:flex;justify-content:space-between;gap:18px;align-items:end;padding:22px;border-radius:22px;background:linear-gradient(135deg,rgba(124,92,255,.15),rgba(247,201,72,.1));border:1px solid rgba(255,255,255,.08)}
+    .hero h2{margin:0 0 8px;font-size:30px} .hero p{margin:0;color:var(--muted);max-width:700px;line-height:1.5}
+    .balance{min-width:220px;padding:16px 18px;border-radius:18px;background:rgba(4,9,16,.4);border:1px solid var(--line)} .balance .label{color:var(--muted);font-size:12px}.balance .value{font-size:28px;font-weight:800;color:var(--gold);margin-top:4px}
+    .content{display:grid;grid-template-columns:1.2fr .8fr;gap:18px;margin-top:18px}.card{padding:18px;border-radius:22px;background:rgba(255,255,255,.03);border:1px solid var(--line)}
+    .card h3{margin:0 0 12px} .muted{color:var(--muted)} .gamebox{display:grid;gap:14px} .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    select,input,button{font:inherit} select,input{background:#08111f;color:var(--text);border:1px solid var(--line);border-radius:12px;padding:12px 12px} input{width:120px}
+    .dealers,.hands{display:grid;gap:10px}.hand{display:flex;gap:10px;flex-wrap:wrap;min-height:82px;padding:12px;border-radius:16px;background:rgba(255,255,255,.03);border:1px dashed rgba(255,255,255,.08)}
+    .cardchip{width:56px;height:76px;border-radius:12px;background:linear-gradient(180deg,#f8fbff,#dfe7f5);color:#121826;display:flex;flex-direction:column;justify-content:space-between;padding:8px;font-weight:800;box-shadow:0 8px 20px rgba(0,0,0,.22)}
+    .cardchip.red{color:#c83e4d}.cardchip .s{font-size:18px;align-self:flex-end} .footer-note{margin-top:12px;color:var(--muted);font-size:12px;line-height:1.5}
+    .statgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px}.stat{padding:14px;border-radius:16px;background:rgba(255,255,255,.03);border:1px solid var(--line)}.stat .k{color:var(--muted);font-size:12px}.stat .v{font-size:22px;font-weight:800;margin-top:4px}
+    .log{max-height:340px;overflow:auto;display:grid;gap:10px}.entry{padding:12px;border-radius:14px;background:rgba(255,255,255,.03);border:1px solid var(--line);font-size:13px;color:#d8e4ff}
+    .good{color:var(--good)} .bad{color:var(--bad)} .chip{display:inline-block;padding:6px 10px;border-radius:999px;background:rgba(247,201,72,.12);border:1px solid rgba(247,201,72,.25);color:#ffe9a5;font-size:12px}
+    @media (max-width: 1180px){.layout{grid-template-columns:1fr}.content{grid-template-columns:1fr}.sidebar,.rightbar{order:2}.main{order:1}}
   </style>
 </head>
 <body>
-  <div class="wrap">
+  <div class="app">
     <div class="topbar">
-      <div>
-        <h1>Blackjack</h1>
-        <p class="subtle">Single-file HTML game using the Deck of Cards API.</p>
-      </div>
-      <div class="stats">
-        <div class="pill">Currency: $<span id="currency">1000</span></div>
-        <div class="pill">Round: <span id="roundNum">1</span></div>
-        <div class="pill">Mode: <span id="modeLabel">Solo</span></div>
-      </div>
+      <div class="brand"><div class="logo"></div><div><h1>Arcade Lounge</h1><p>Fantasy coins, card tables, and bot opponents</p></div></div>
+      <div class="pillrow"><div class="pill">Wallet: <strong id="walletTop">10,000</strong> Coins</div><div class="pill">Mode: <strong id="modeLabel">Blackjack</strong></div><div class="pill">Status: <strong id="statusLabel">Ready</strong></div></div>
     </div>
+    <div class="layout">
+      <aside class="panel sidebar">
+        <h2>Game Lobby</h2>
+        <div class="menu">
+          <button class="active" data-mode="blackjack">Blackjack</button>
+          <button data-mode="poker">Poker</button>
+          <button data-mode="baccarat">Baccarat</button>
+          <button data-mode="roulette">Roulette</button>
+        </div>
+        <div class="footer-note">This is a fictional demo with no real-money wagering.</div>
+      </aside>
 
-    <div class="grid">
-      <div class="panel">
-        <div class="row">
-          <label class="label">Mode</label>
-          <select id="mode">
-            <option value="solo">Solo vs Dealer</option>
-            <option value="local">Local Multiplayer</option>
-          </select>
-
-          <label class="label">Players</label>
-          <select id="playerCount">
-            <option>1</option>
-            <option>2</option>
-            <option>3</option>
-            <option>4</option>
-          </select>
-
-          <label class="label">Bet</label>
-          <input id="bet" type="number" min="1" step="1" value="50" />
-
-          <button id="dealBtn">Deal</button>
-          <button id="resetCurrencyBtn" class="secondary">Reset Currency</button>
+      <main class="panel main">
+        <div class="hero">
+          <div>
+            <h2 id="title">Blackjack Table</h2>
+            <p id="subtitle">Play against a bot dealer with fake coins. Try to beat 21 without going over.</p>
+          </div>
+          <div class="balance"><div class="label">Current Balance</div><div class="value" id="walletMain">10,000</div></div>
         </div>
 
-        <div class="hand">
-          <h2>Dealer</h2>
-          <div class="subtle">Dealer must hit on 16 and stand on 17.</div>
-          <div id="dealerCards" class="cards"></div>
-          <div class="subtle">Dealer total: <span id="dealerTotal">0</span></div>
+        <div class="content">
+          <section class="card">
+            <h3>Table</h3>
+            <div class="gamebox" id="gameArea"></div>
+          </section>
+          <section class="card">
+            <h3>Stats</h3>
+            <div class="statgrid">
+              <div class="stat"><div class="k">Wins</div><div class="v good" id="wins">0</div></div>
+              <div class="stat"><div class="k">Losses</div><div class="v bad" id="losses">0</div></div>
+              <div class="stat"><div class="k">Pushes</div><div class="v" id="pushes">0</div></div>
+              <div class="stat"><div class="k">Streak</div><div class="v" id="streak">0</div></div>
+            </div>
+            <div class="footer-note">Bots use simple rules, so you can focus on the UI and game flow.</div>
+          </section>
         </div>
+      </main>
 
-        <div id="playerHands"></div>
-
-        <div class="status" id="message">Set your bet and press Deal.</div>
-      </div>
-
-      <div class="panel">
-        <h2>Rules and controls</h2>
-        <div class="subtle" style="margin-top:8px;line-height:1.5">
-          Blackjack pays 3:2 on a natural blackjack. Split is available on the first two cards when they match.
-          Double down is available after the initial deal. Insurance appears when the dealer shows an ace.
-        </div>
-        <div class="controls">
-          <button id="hitBtn">Hit</button>
-          <button id="standBtn">Stand</button>
-          <button id="doubleBtn">Double Down</button>
-          <button id="splitBtn">Split</button>
-          <button id="insuranceBtn">Take Insurance</button>
-          <button id="nextBtn" class="secondary">Next Player</button>
-          <button id="newRoundBtn" class="danger">New Round</button>
-        </div>
-        <div class="subtle" style="margin-top:14px">
-          Multiplayer here is pass-and-play on one iPad/browser. For true online multiplayer, you would add a backend for room sync.
-        </div>
-      </div>
+      <aside class="panel rightbar">
+        <h2>Activity</h2>
+        <div class="row" style="margin-bottom:10px"><span class="chip">Fake Currency</span><span class="chip">Bot Opponents</span></div>
+        <div class="log" id="log"></div>
+      </aside>
     </div>
   </div>
 
-  <script>
-    const apiBase = 'https://deckofcardsapi.com/api/deck';
-    const suitSymbols = {SPADES:'♠',HEARTS:'♥',DIAMONDS:'♦',CLUBS:'♣'};
-    const valueMap = {ACE:11,JACK:10,QUEEN:10,KING:10,'10':10,'9':9,'8':8,'7':7,'6':6,'5':5,'4':4,'3':3,'2':2};
-
-    let currency = 1000;
-    let roundNum = 1;
-    let deckId = null;
-    let dealer = { cards: [], hidden: null };
-    let players = [];
-    let currentPlayer = 0;
-    let gameState = 'idle';
-    let baseBet = 50;
-    let mode = 'solo';
-    let playerCount = 1;
-
-    const el = id => document.getElementById(id);
-    const currencyEl = el('currency');
-    const roundNumEl = el('roundNum');
-    const modeLabelEl = el('modeLabel');
-    const dealerCardsEl = el('dealerCards');
-    const dealerTotalEl = el('dealerTotal');
-    const playerHandsEl = el('playerHands');
-    const messageEl = el('message');
-
-    function setMessage(text, cls='') {
-      messageEl.className = 'status ' + cls;
-      messageEl.textContent = text;
-    }
-
-    function cardValue(card) {
-      return valueMap[card.value] || 10;
-    }
-
-    function handValue(cards) {
-      let total = cards.reduce((s,c)=>s+cardValue(c),0);
-      let aces = cards.filter(c=>c.value==='ACE').length;
-      while(total > 21 && aces > 0) { total -= 10; aces--; }
-      return total;
-    }
-
-    function isSoft(cards) {
-      let total = cards.reduce((s,c)=>s+cardValue(c),0);
-      let aces = cards.filter(c=>c.value==='ACE').length;
-      return aces > 0 && total <= 21;
-    }
-
-    function renderCard(card, hidden=false) {
-      const d = document.createElement('div');
-      d.className = 'card' + (hidden ? ' back' : (card.suit === 'HEARTS' || card.suit === 'DIAMONDS' ? ' red' : ''));
-      if (hidden) {
-        d.innerHTML = '<div class="big">🂠</div><div class="small">BLACKJACK</div>';
-      } else {
-        d.innerHTML = `<div class="small">${card.value}<span style="margin-left:4px">${suitSymbols[card.suit]}</span></div>
-                       <div class="big" style="text-align:center">${suitSymbols[card.suit]}</div>
-                       <div class="small" style="text-align:right">${card.value}</div>`;
-      }
-      return d;
-    }
-
-    function render() {
-      currencyEl.textContent = currency;
-      roundNumEl.textContent = roundNum;
-      modeLabelEl.textContent = mode === 'solo' ? 'Solo' : 'Local Multiplayer';
-      dealerCardsEl.innerHTML = '';
-      dealer.cards.forEach(c => dealerCardsEl.appendChild(renderCard(c)));
-      if (dealer.hidden) dealerCardsEl.appendChild(renderCard(dealer.hidden, gameState !== 'reveal'));
-      dealerTotalEl.textContent = gameState === 'reveal' || gameState === 'done' ? handValue([...dealer.cards, ...(dealer.hidden ? [dealer.hidden] : [])]) : (dealer.cards[0] ? cardValue(dealer.cards[0]) : 0);
-
-      playerHandsEl.innerHTML = '';
-      players.forEach((p, idx) => {
-        const box = document.createElement('div');
-        box.className = 'playerCard' + (idx === currentPlayer && gameState === 'playing' ? ' active' : '');
-        const total = p.hands[p.activeHand] ? handValue(p.hands[p.activeHand]) : 0;
-        const hand = p.hands[p.activeHand] || [];
-        box.innerHTML = `
-          <div class="row" style="justify-content:space-between">
-            <div>
-              <h2>${mode === 'solo' ? 'Player' : 'Player ' + (idx + 1)}</h2>
-              <div class="subtle">Bet: $${p.bet} ${p.split ? '(split active)' : ''}</div>
-            </div>
-            <div class="pill">Total: ${total}</div>
-          </div>
-          <div class="cards"></div>
-          <div class="subtle">Status: ${p.state} ${isSoft(hand) ? '(soft)' : ''}</div>
-        `;
-        const cardsDiv = box.querySelector('.cards');
-        hand.forEach(c => cardsDiv.appendChild(renderCard(c)));
-        if (p.hands.length > 1) {
-          const splitIdx = document.createElement('div');
-          splitIdx.className = 'subtle';
-          splitIdx.style.marginTop = '8px';
-          splitIdx.textContent = 'Split hand count: ' + p.hands.length;
-          box.appendChild(splitIdx);
-        }
-        playerHandsEl.appendChild(box);
-      });
-      syncButtons();
-    }
-
-    function syncButtons() {
-      const canPlay = gameState === 'playing';
-      el('hitBtn').disabled = !canPlay;
-      el('standBtn').disabled = !canPlay;
-      el('doubleBtn').disabled = !canPlay || !canDouble();
-      el('splitBtn').disabled = !canPlay || !canSplit();
-      el('insuranceBtn').disabled = !canInsurance();
-      el('nextBtn').disabled = mode === 'solo' || gameState !== 'playing';
-      el('dealBtn').disabled = gameState === 'playing';
-    }
-
-    function canDouble() {
-      const p = players[currentPlayer];
-      return p && p.hands[p.activeHand].length === 2 && currency >= p.bet;
-    }
-
-    function canSplit() {
-      const p = players[currentPlayer];
-      if (!p || p.hands[p.activeHand].length !== 2) return false;
-      return p.hands[p.activeHand][0].value === p.hands[p.activeHand][1].value && currency >= p.bet;
-    }
-
-    function canInsurance() {
-      return gameState === 'playing' && dealer.cards.length === 1 && dealer.hidden && dealer.hidden.value === 'ACE' && !players[currentPlayer].insuranceTaken && currency >= Math.ceil(players[currentPlayer].bet / 2);
-    }
-
-    async function newDeck() {
-      const r = await fetch(`${apiBase}/new/shuffle/?deck_count=1`);
-      const j = await r.json();
-      deckId = j.deck_id;
-    }
-
-    async function draw(count = 1) {
-      const r = await fetch(`${apiBase}/${deckId}/draw/?count=${count}`);
-      const j = await r.json();
-      return j.cards;
-    }
-
-    function initPlayers() {
-      players = Array.from({length: playerCount}, () => ({
-        bet: baseBet,
-        cards: [],
-        hands: [[]],
-        activeHand: 0,
-        state: 'waiting',
-        split: false,
-        insuranceTaken: false,
-        insurance: 0,
-        doubled: false,
-        outcome: null
-      }));
-    }
-
-    async function deal() {
-      baseBet = Math.max(1, parseInt(el('bet').value || '1', 10));
-      mode = el('mode').value;
-      playerCount = parseInt(el('playerCount').value, 10);
-      if (baseBet > currency) return setMessage('Not enough currency for that bet.', 'lose');
-
-      await newDeck();
-      dealer = { cards: [], hidden: null };
-      initPlayers();
-      currentPlayer = 0;
-      gameState = 'playing';
-
-      for (let i = 0; i < playerCount; i++) {
-        players[i].bet = baseBet;
-        players[i].hands[0] = await draw(2);
-        players[i].state = 'playing';
-      }
-
-      dealer.cards = await draw(1);
-      dealer.hidden = (await draw(1))[0];
-
-      setMessage('Round started. Play your hand.', '');
-      render();
-
-      if (dealer.cards[0].value === 'ACE') setMessage('Dealer shows an ace. Insurance is available.', '');
-      checkNaturalBlackjacks();
-    }
-
-    function checkNaturalBlackjacks() {
-      const dealerBJ = handValue([...dealer.cards, dealer.hidden]) === 21 && dealer.cards.length === 2;
-      players.forEach((p, idx) => {
-        const v = handValue(p.hands[0]);
-        if (v === 21 && p.hands[0].length === 2) {
-          if (dealerBJ) {
-            p.outcome = 'push';
-          } else {
-            p.outcome = 'blackjack';
-            currency += Math.floor(p.bet * 1.5);
-          }
-          p.state = 'done';
-        }
-      });
-      if (players.every(p => p.state === 'done')) finishRound();
-      render();
-    }
-
-    async function hit() {
-      const p = players[currentPlayer];
-      p.hands[p.activeHand].push((await draw(1))[0]);
-      const total = handValue(p.hands[p.activeHand]);
-      if (total > 21) {
-        p.state = 'bust';
-        nextTurn();
-      }
-      render();
-    }
-
-    function stand() {
-      players[currentPlayer].state = 'stand';
-      nextTurn();
-    }
-
-    async function doubleDown() {
-      const p = players[currentPlayer];
-      currency -= p.bet;
-      p.bet *= 2;
-      p.doubled = true;
-      p.hands[p.activeHand].push((await draw(1))[0]);
-      p.state = handValue(p.hands[p.activeHand]) > 21 ? 'bust' : 'stand';
-      nextTurn();
-      render();
-    }
-
-    async function splitHand() {
-      const p = players[currentPlayer];
-      currency -= p.bet;
-      const [a, b] = p.hands[0];
-      p.hands = [[a], [b]];
-      p.split = true;
-      p.hands[0].push((await draw(1))[0]);
-      p.hands[1].push((await draw(1))[0]);
-      p.activeHand = 0;
-      render();
-    }
-
-    function takeInsurance() {
-      const p = players[currentPlayer];
-      const cost = Math.ceil(p.bet / 2);
-      currency -= cost;
-      p.insuranceTaken = true;
-      p.insurance = cost;
-      setMessage('Insurance taken.', '');
-      render();
-    }
-
-    function nextTurn() {
-      const p = players[currentPlayer];
-      if (p.split && p.activeHand === 0 && p.state !== 'bust') {
-        p.activeHand = 1;
-        p.state = 'playing';
-        render();
-        return;
-      }
-      if (currentPlayer < players.length - 1) {
-        currentPlayer++;
-      } else {
-        gameState = 'reveal';
-        dealerPlay();
-        return;
-      }
-      if (players[currentPlayer].state === 'done') nextTurn();
-      setMessage((mode === 'solo' ? 'Player' : 'Player ' + (currentPlayer + 1)) + ' turn.', '');
-      render();
-    }
-
-    async function dealerPlay() {
-      dealerCardsEl.innerHTML = '';
-      dealer.hidden = dealer.hidden;
-      while (handValue([...dealer.cards, dealer.hidden]) < 17) {
-        dealer.cards.push((await draw(1))[0]);
-      }
-      resolveRound();
-      gameState = 'done';
-      render();
-    }
-
-    function resolveRound() {
-      const dealerTotal = handValue([...dealer.cards, dealer.hidden]);
-      const dealerBJ = dealerTotal === 21 && dealer.cards.length + 1 === 2;
-      players.forEach((p, idx) => {
-        const hands = p.hands;
-        let net = 0;
-        hands.forEach(hand => {
-          const total = handValue(hand);
-          let result = '';
-          if (total > 21) result = 'lose';
-          else if (dealerTotal > 21) result = 'win';
-          else if (dealerBJ && total !== 21) result = 'lose';
-          else if (total > dealerTotal) result = 'win';
-          else if (total < dealerTotal) result = 'lose';
-          else result = 'push';
-
-          if (result === 'win') net += p.bet * 2;
-          if (result === 'push') net += p.bet;
-          if (result === 'blackjack') net += Math.floor(p.bet * 2.5);
-          p.outcome = result;
-        });
-
-        if (p.insuranceTaken && dealerBJ) net += p.insurance * 3;
-        currency += net;
-      });
-      setMessage('Round complete. Press New Round to play again.', 'win');
-    }
-
-    function finishRound() {
-      gameState = 'done';
-      setMessage('Round complete. Press New Round to play again.', 'win');
-      render();
-    }
-
-    function newRound() {
-      roundNum++;
-      dealer = { cards: [], hidden: null };
-      players = [];
-      currentPlayer = 0;
-      gameState = 'idle';
-      setMessage('Set your bet and press Deal.', '');
-      render();
-    }
-
-    el('dealBtn').addEventListener('click', deal);
-    el('resetCurrencyBtn').addEventListener('click', () => {
-      currency = 1000;
-      setMessage('Currency reset to $1000.', '');
-      render();
-    });
-    el('hitBtn').addEventListener('click', hit);
-    el('standBtn').addEventListener('click', stand);
-    el('doubleBtn').addEventListener('click', doubleDown);
-    el('splitBtn').addEventListener('click', splitHand);
-    el('insuranceBtn').addEventListener('click', takeInsurance);
-    el('nextBtn').addEventListener('click', nextTurn);
-    el('newRoundBtn').addEventListener('click', newRound);
-
-    el('mode').addEventListener('change', () => {
-      mode = el('mode').value;
-      modeLabelEl.textContent = mode === 'solo' ? 'Solo' : 'Local Multiplayer';
-      render();
-    });
-    el('playerCount').addEventListener('change', () => {
-      playerCount = parseInt(el('playerCount').value, 10);
-      render();
-    });
-
-    render();
-  </script>
+<script>
+const state = {wallet:10000,wins:0,losses:0,pushes:0,streak:0,mode:'blackjack',bet:100,player:[],dealer:[],roundActive:false,deck:[]}
+const suits = ['♠','♥','♦','♣']; const names = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+const el = id => document.getElementById(id);
+const fmt = n => n.toLocaleString();
+function log(msg, cls=''){ const div=document.createElement('div'); div.className='entry '+cls; div.textContent=msg; el('log').prepend(div); }
+function update(){ el('walletTop').textContent=fmt(state.wallet); el('walletMain').textContent=fmt(state.wallet); el('wins').textContent=state.wins; el('losses').textContent=state.losses; el('pushes').textContent=state.pushes; el('streak').textContent=state.streak; el('modeLabel').textContent=state.mode[0].toUpperCase()+state.mode.slice(1); }
+function buildDeck(){ state.deck=[]; for(const s of suits) for(let i=0;i<13;i++) state.deck.push({name:names[i],suit:s,val:i===0?11:Math.min(i+1,10)}); state.deck.sort(()=>Math.random()-.5); }
+function draw(){ return state.deck.pop(); }
+function handValue(hand){ let sum=0, aces=0; hand.forEach(c=>{sum+=c.val;if(c.name==='A') aces++}); while(sum>21 && aces){sum-=10; aces--} return sum; }
+function chip(card){ const d=document.createElement('div'); d.className='cardchip '+(['♥','♦'].includes(card.suit)?'red':''); d.innerHTML=`<div>${card.name}</div><div class='s'>${card.suit}</div>`; return d; }
+function renderBlackjack(){ el('gameArea').innerHTML = `
+  <div class='row'><label>Bet</label><input id='betInput' type='number' min='10' step='10' value='${state.bet}' /><button class='action' id='dealBtn'>Deal</button><button class='action' id='hitBtn' ${state.roundActive?'':'disabled'}>Hit</button><button class='action' id='standBtn' ${state.roundActive?'':'disabled'}>Stand</button></div>
+  <div class='dealers'><div><strong>Dealer</strong> <span class='muted' id='dealerScore'></span></div><div class='hand' id='dealerHand'></div></div>
+  <div class='hands'><div><strong>You</strong> <span class='muted' id='playerScore'></span></div><div class='hand' id='playerHand'></div></div>`;
+  el('dealBtn').onclick = deal; el('hitBtn').onclick = hit; el('standBtn').onclick = stand; el('betInput').onchange = e=> state.bet = Math.max(10, parseInt(e.target.value||'10',10)); renderHands(); }
+function renderPoker(){ el('gameArea').innerHTML = `<div class='row'><button class='action' id='playPoker'>Deal Poker Hand</button><div class='chip'>Bot folds if hand is weak</div></div><div class='dealers'><div><strong>Your Hand</strong></div><div class='hand' id='pokerPlayer'></div></div><div class='dealers'><div><strong>Bot Hand</strong></div><div class='hand' id='pokerBot'></div></div><div class='footer-note'>Poker demo compares a simplified hand score, not full Texas Hold'em.</div>`; el('playPoker').onclick = pokerRound; }
+function renderBaccarat(){ el('gameArea').innerHTML = `<div class='row'><button class='action' id='baccBtn'>Play Round</button><div class='chip'>Bet on Player / Bot / Tie</div><select id='sideSel'><option>Player</option><option>Bot</option><option>Tie</option></select></div><div class='dealers'><div><strong>Player</strong></div><div class='hand' id='baccPlayer'></div></div><div class='dealers'><div><strong>Bot</strong></div><div class='hand' id='baccBot'></div></div><div class='footer-note'>Baccarat uses card totals modulo 10.</div>`; el('baccBtn').onclick = baccaratRound; }
+function renderRoulette(){ el('gameArea').innerHTML = `<div class='row'><button class='action' id='spinBtn'>Spin Wheel</button><input id='rouletteBet' type='number' min='10' step='10' value='100' /><select id='roulettePick'><option>Red</option><option>Black</option><option>Green</option></select></div><div class='card'><h3 style='margin-top:0'>Wheel Result</h3><div id='wheelResult' style='font-size:28px;font-weight:800;color:var(--gold)'>—</div><div class='footer-note'>This is a visual roulette-style mini-game.</div></div>`; el('spinBtn').onclick = rouletteRound; }
+function renderMode(){ el('title').textContent = ({blackjack:'Blackjack Table', poker:'Poker Room', baccarat:'Baccarat Lounge', roulette:'Roulette Wheel'})[state.mode]; el('subtitle').textContent = ({blackjack:'Play against a bot dealer with fake coins. Try to beat 21 without going over.', poker:'Face off with a simple bot and compare hand strength.', baccarat:'Choose a side and see how the bot table resolves the round.', roulette:'Pick a color and spin the wheel for a quick fantasy round.'})[state.mode]; ({blackjack:renderBlackjack,poker:renderPoker,baccarat:renderBaccarat,roulette:renderRoulette})[state.mode](); update(); }
+function deal(){ const bet = Math.max(10, parseInt(el('betInput').value||'10',10)); if(bet>state.wallet){log('Not enough coins for that bet.','bad'); return} state.bet=bet; state.wallet-=bet; state.roundActive=true; buildDeck(); state.player=[draw(),draw()]; state.dealer=[draw(),draw()]; log(`Blackjack started with bet ${fmt(bet)} coins.`); renderHands(); }
+function renderHands(){ if(state.mode!=='blackjack') return; const ph=el('playerHand'), dh=el('dealerHand'); ph.innerHTML=''; dh.innerHTML=''; state.player.forEach(c=>ph.appendChild(chip(c))); state.dealer.forEach((c,i)=>dh.appendChild(chip(c))); el('playerScore').textContent='(' + handValue(state.player) + ')'; el('dealerScore').textContent='(' + (state.roundActive ? '?' : handValue(state.dealer)) + ')'; el('hitBtn').disabled=!state.roundActive; el('standBtn').disabled=!state.roundActive; }
+function settle(result){ state.roundActive=false; if(result==='win'){state.wallet += state.bet*2; state.wins++; state.streak++; log(`You won ${fmt(state.bet)} coins.`, 'good')} else if(result==='push'){state.wallet += state.bet; state.pushes++; log('Push. Your bet was returned.')} else {state.losses++; state.streak=0; log(`You lost ${fmt(state.bet)} coins.`, 'bad')} update(); renderHands(); }
+function hit(){ if(!state.roundActive) return; state.player.push(draw()); renderHands(); const v=handValue(state.player); if(v>21) settle('lose'); }
+function stand(){ if(!state.roundActive) return; while(handValue(state.dealer)<17) state.dealer.push(draw()); const pv=handValue(state.player), dv=handValue(state.dealer); renderHands(); if(dv>21 || pv>dv) settle('win'); else if(pv===dv) settle('push'); else settle('lose'); }
+function pokerScore(hand){ const vals=hand.map(c=>c.val).sort((a,b)=>b-a); return vals[0]*100 + vals[1]*10 + vals[2]; }
+function pokerRound(){ if(state.wallet<50){log('Need more coins to join poker.','bad'); return} const bet=100; state.wallet-=bet; buildDeck(); const player=[draw(),draw(),draw()], bot=[draw(),draw(),draw()]; const ps=pokerScore(player), bs=pokerScore(bot); el('pokerPlayer').innerHTML=''; el('pokerBot').innerHTML=''; player.forEach(c=>el('pokerPlayer').appendChild(chip(c))); bot.forEach(c=>el('pokerBot').appendChild(chip(c))); if(ps>bs){state.wallet+=bet*2; state.wins++; state.streak++; log('Poker win against the bot.','good')} else if(ps===bs){state.wallet+=bet; state.pushes++; log('Poker push.')} else {state.losses++; state.streak=0; log('Poker loss to the bot.','bad')} update(); }
+function baccaratRound(){ if(state.wallet<50){log('Need more coins to join baccarat.','bad'); return} const bet=100; state.wallet-=bet; buildDeck(); const player=[draw(),draw()], bot=[draw(),draw()]; let pt=player.reduce((a,c)=>a+c.val,0)%10, bt=bot.reduce((a,c)=>a+c.val,0)%10; while(pt<6) { const c=draw(); player.push(c); pt=(pt+c.val)%10; } while(bt<6) { const c=draw(); bot.push(c); bt=(bt+c.val)%10; } el('baccPlayer').innerHTML=''; el('baccBot').innerHTML=''; player.forEach(c=>el('baccPlayer').appendChild(chip(c))); bot.forEach(c=>el('baccBot').appendChild(chip(c))); const pick=el('roulettePick')?.value || 'Player'; const winner = pt===bt ? 'Tie' : pt>bt ? 'Player' : 'Bot'; if((pick===winner) || (winner==='Tie' && pick==='Tie')){state.wallet+=bet*2; state.wins++; state.streak++; log(`Baccarat win: ${winner}.`, 'good')} else {state.losses++; state.streak=0; log(`Baccarat loss. Winner was ${winner}.`, 'bad')} update(); }
+function rouletteRound(){ const bet=Math.max(10, parseInt(el('rouletteBet').value||'10',10)); if(bet>state.wallet){log('Not enough coins for roulette.','bad'); return} const pick=el('roulettePick').value; state.wallet-=bet; const n=Math.floor(Math.random()*37); const color = n===0 ? 'Green' : [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36].includes(n) ? 'Red' : 'Black'; el('wheelResult').textContent = `${n} • ${color}`; if(pick===color){state.wallet += bet*2; state.wins++; state.streak++; log(`Roulette win on ${color}.`, 'good')} else {state.losses++; state.streak=0; log(`Roulette loss. Landed on ${color}.`, 'bad')} update(); }
+document.querySelectorAll('.menu button').forEach(btn=>btn.onclick=()=>{document.querySelectorAll('.menu button').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); state.mode=btn.dataset.mode; renderMode();});
+log('Welcome to Arcade Lounge. Pick a game and try your luck against the bots.'); renderMode(); update();
+</script>
 </body>
 </html>
